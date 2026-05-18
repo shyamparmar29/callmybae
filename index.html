@@ -1250,7 +1250,7 @@
           <label class="input-label">Password</label>
           <input type="password" class="wizard-input" placeholder="••••••••">
         </div>
-        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="showToast('Signing in… (demo)')">Sign In →</button>
+        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="doSignIn()">Sign In →</button>
         <p style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:1rem">
           <a href="#" style="color:var(--rose);text-decoration:none">Forgot password?</a>
         </p>
@@ -1273,7 +1273,7 @@
           <label class="input-label">Password</label>
           <input type="password" class="wizard-input" placeholder="Create a strong password">
         </div>
-        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="showToast('Account created! (demo)')">Create Account →</button>
+        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="doSignUp()">Create Account →</button>
         <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-top:1rem;line-height:1.5">
           By signing up you agree to our <a href="#" style="color:var(--rose);text-decoration:none">Terms</a> and <a href="#" style="color:var(--rose);text-decoration:none">Privacy Policy</a>. 18+ only.
         </p>
@@ -1300,7 +1300,9 @@
     description: '',
     companionName: '',
     phoneNumber: '',
-    timerInterval: null
+    timerInterval: null,
+    statusInterval: null,
+    callSessionId: null,
   };
 
   // ── STEP DOTS ──
@@ -1449,9 +1451,11 @@
   }
 
   // ── INITIATE CALL ──
-  function initiateCall() {
+  const API_URL = 'https://callmybae-backend.onrender.com';
+
+  async function initiateCall() {
     const code = document.getElementById('countryCode').value;
-    const num = code + ' ' + state.phoneNumber;
+    const num = code + state.phoneNumber;
 
     document.getElementById('callingName').textContent = state.companionName;
     document.getElementById('callingNumber').textContent = num;
@@ -1461,22 +1465,58 @@
     document.getElementById('callingAvatar').style.background = avatars[state.companionType] || avatars.her;
 
     goStep(5);
-    startCallTimer();
+    document.getElementById('callingStatus').textContent = '● Connecting…';
+    document.getElementById('callingStatus').style.color = 'var(--rose)';
 
-    // Simulate status changes
-    setTimeout(() => {
-      document.getElementById('callingStatus').textContent = '● Ringing your phone…';
-    }, 1500);
-    setTimeout(() => {
-      document.getElementById('callingStatus').textContent = '● Connected — pick up!';
-      document.getElementById('callingStatus').style.color = '#4ade80';
-    }, 3500);
+    try {
+      const response = await fetch(API_URL + '/api/calls/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: num,
+          companion_name: state.companionName,
+          companion_type: state.companionType,
+          personalities: state.personalities,
+          description: state.description,
+          language: document.getElementById('langPref').value,
+        })
+      });
+      const data = await response.json();
 
-    // In production: call your backend API here
-    // fetch('/api/initiate-call', { method:'POST', headers:{'Content-Type':'application/json'},
-    //   body: JSON.stringify({ phone: num, companionType: state.companionType,
-    //     personalities: state.personalities, description: state.description,
-    //     companionName: state.companionName }) })
+      if (response.ok && data.call_session_id) {
+        state.callSessionId = data.call_session_id;
+        document.getElementById('callingStatus').textContent = '● Ringing your phone…';
+        startCallTimer();
+        // Poll call status every 3 seconds
+        state.statusInterval = setInterval(() => pollCallStatus(data.call_session_id), 3000);
+      } else {
+        const msg = data.detail || 'Could not place call. Try again.';
+        document.getElementById('callingStatus').textContent = '● ' + msg;
+        document.getElementById('callingStatus').style.color = 'var(--gold)';
+        if (response.status === 403) {
+          // Free call already used
+          setTimeout(() => { closeWizard(); openAuth(); }, 2000);
+        }
+      }
+    } catch(e) {
+      document.getElementById('callingStatus').textContent = '● Connection error — please try again';
+      document.getElementById('callingStatus').style.color = 'var(--gold)';
+    }
+  }
+
+  async function pollCallStatus(sessionId) {
+    try {
+      const res = await fetch(API_URL + '/api/calls/status/' + sessionId);
+      const data = await res.json();
+      if (data.status === 'connected') {
+        document.getElementById('callingStatus').textContent = '● Connected — pick up!';
+        document.getElementById('callingStatus').style.color = '#4ade80';
+        clearInterval(state.statusInterval);
+      } else if (data.status === 'ended') {
+        clearInterval(state.statusInterval);
+        clearInterval(state.timerInterval);
+      }
+    } catch(e) {}
   }
 
   let callSeconds = 0;
@@ -1521,6 +1561,7 @@
 
   function closeWizard() {
     clearInterval(state.timerInterval);
+    clearInterval(state.statusInterval);
     document.getElementById('wizardModal').classList.remove('active');
     document.body.style.overflow = '';
   }
@@ -1594,6 +1635,54 @@
     el.style.transition = 'opacity 0.55s ease, transform 0.55s ease, border-color 0.3s, background 0.3s, box-shadow 0.3s';
     observer.observe(el);
   });
+
+  // ── REAL AUTH ──
+  async function doSignIn() {
+    const emailOrPhone = document.querySelector('#authSignin input[type="text"]').value.trim();
+    const password = document.querySelector('#authSignin input[type="password"]').value;
+    if (!emailOrPhone || !password) { showToast('Please fill in all fields'); return; }
+    const isPhone = emailOrPhone.startsWith('+') || /^\d/.test(emailOrPhone);
+    try {
+      const res = await fetch(API_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(isPhone ? {phone: emailOrPhone, password} : {email: emailOrPhone, password})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('cmb_token', data.access_token);
+        localStorage.setItem('cmb_user', JSON.stringify({id: data.user_id, name: data.name, plan: data.plan}));
+        showToast('Welcome back, ' + data.name + '! ✦');
+        closeAuth();
+      } else {
+        showToast(data.detail || 'Sign in failed');
+      }
+    } catch(e) { showToast('Connection error'); }
+  }
+
+  async function doSignUp() {
+    const name     = document.querySelector('#authSignup input[type="text"]').value.trim();
+    const email    = document.querySelector('#authSignup input[type="email"]').value.trim();
+    const phone    = document.querySelector('#authSignup input[type="tel"]').value.trim();
+    const password = document.querySelector('#authSignup input[type="password"]').value;
+    if (!name || !password || (!email && !phone)) { showToast('Please fill in all fields'); return; }
+    try {
+      const res = await fetch(API_URL + '/api/auth/register', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, email: email||null, phone: phone||null, password})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('cmb_token', data.access_token);
+        localStorage.setItem('cmb_user', JSON.stringify({id: data.user_id, name: data.name, plan: data.plan}));
+        showToast('Welcome to CallMyBae, ' + data.name + '! ✦');
+        closeAuth();
+      } else {
+        showToast(data.detail || 'Registration failed');
+      }
+    } catch(e) { showToast('Connection error'); }
+  }
 
   // Init dots
   renderDots(1);
