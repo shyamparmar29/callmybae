@@ -77,14 +77,8 @@
     transition: var(--trans);
   }
   nav .inner { display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:0 auto; padding:0 2rem; }
-  .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.7rem; font-weight: 600;
-    background: linear-gradient(135deg, var(--rose), var(--gold));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
-  }
-  .logo span { font-style: italic; }
+  .logo { display: flex; align-items: center; text-decoration: none; }
+
   nav ul { list-style:none; display:flex; gap:2rem; align-items:center; }
   nav ul a { color:var(--cream2); text-decoration:none; font-size:0.88rem; font-weight:500; letter-spacing:0.01em; transition:var(--trans); }
   nav ul a:hover { color:var(--cream); }
@@ -660,7 +654,9 @@
 <!-- NAV -->
 <nav>
   <div class="inner">
-    <a href="#" class="logo">Call<span>My</span>Bae</a>
+    <a href="#" class="logo">
+      <img src="cmb-removebg-preview.png" alt="CallMyBae" style="height:44px;width:auto;display:block;">
+    </a>
     <ul>
       <li><a href="#how">How It Works</a></li>
       <li><a href="#personalities">Companions</a></li>
@@ -676,6 +672,7 @@
 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
+  <img src="cmb-removebg-preview.png" alt="CallMyBae" style="height:48px;width:auto;">
   <a href="#how" onclick="toggleMobileMenu()">How It Works</a>
   <a href="#personalities" onclick="toggleMobileMenu()">Companions</a>
   <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
@@ -998,7 +995,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo">Call<span>My</span>Bae</div>
+        <img src="cmb-removebg-preview.png" alt="CallMyBae" style="height:42px;width:auto;display:block;margin-bottom:0.5rem;">
         <p>Emotionally intelligent AI companions for voice, chat, and connection. Available anywhere in the world.</p>
       </div>
       <div class="footer-col">
@@ -1236,7 +1233,7 @@
     <button class="modal-close" onclick="closeAuth()">✕</button>
     <div class="modal-inner">
       <div style="text-align:center;margin-bottom:1.5rem">
-        <div class="logo" style="font-size:1.8rem;display:block;text-align:center">CallMyBae</div>
+        <img src="cmb-removebg-preview.png" alt="CallMyBae" style="height:52px;width:auto;display:block;margin:0 auto 0.3rem;">
         <p style="font-size:0.85rem;color:var(--muted);margin-top:0.5rem">Your companion remembers everything</p>
       </div>
       <div class="auth-tabs">
