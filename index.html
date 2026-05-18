@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CallMyBae — Your AI Companion Awaits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06040e;
+    --bg2: #0e0a1a;
+    --bg3: #160f28;
+    --rose: #ff6b8a;
+    --rose2: #ff4d73;
+    --gold: #f5c85a;
+    --gold2: #e0a830;
+    --cream: #f0e4d0;
+    --cream2: #c8b8a0;
+    --muted: #7a6e8a;
+    --border: rgba(255,107,138,0.15);
+    --border2: rgba(245,200,90,0.2);
+    --card: rgba(255,255,255,0.04);
+    --glass: rgba(14,10,26,0.85);
+    --r: 14px;
+    --r2: 22px;
+    --trans: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 4px; }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* ── GLOW ORBS ── */
+  .orb {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+    filter: blur(80px); opacity: 0.12;
+  }
+  .orb1 { width:600px; height:600px; background:var(--rose); top:-200px; right:-100px; animation: drift1 18s ease-in-out infinite alternate; }
+  .orb2 { width:500px; height:500px; background:var(--gold); bottom:-100px; left:-100px; animation: drift2 22s ease-in-out infinite alternate; }
+  .orb3 { width:300px; height:300px; background:#9b59ff; top:50%; left:50%; transform:translate(-50%,-50%); animation: drift3 14s ease-in-out infinite alternate; }
+
+  @keyframes drift1 { to { transform:translate(-60px, 80px); } }
+  @keyframes drift2 { to { transform:translate(80px, -60px); } }
+  @keyframes drift3 { to { transform:translate(30px, -40px); } }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+  section { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.1rem 0;
+    backdrop-filter: blur(24px) saturate(1.8);
+    background: rgba(6,4,14,0.75);
+    border-bottom: 0.5px solid var(--border);
+    transition: var(--trans);
+  }
+  nav .inner { display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:0 auto; padding:0 2rem; }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.7rem; font-weight: 600;
+    background: linear-gradient(135deg, var(--rose), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .logo span { font-style: italic; }
+  nav ul { list-style:none; display:flex; gap:2rem; align-items:center; }
+  nav ul a { color:var(--cream2); text-decoration:none; font-size:0.88rem; font-weight:500; letter-spacing:0.01em; transition:var(--trans); }
+  nav ul a:hover { color:var(--cream); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--rose), var(--rose2));
+    color: white !important; padding: 0.55rem 1.4rem;
+    border-radius: 100px; font-size: 0.88rem !important;
+    box-shadow: 0 4px 20px rgba(255,107,138,0.35);
+    transition: var(--trans) !important;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,107,138,0.45) !important; }
+  .hamburger { display:none; background:none; border:none; cursor:pointer; }
+  .hamburger span { display:block; width:22px; height:1.5px; background:var(--cream); margin:5px 0; border-radius:2px; transition:var(--trans); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 8rem 0 5rem;
+    overflow: hidden;
+  }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,107,138,0.12); border: 0.5px solid var(--border);
+    padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.78rem;
+    color: var(--rose); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+  .pulse-dot { width:7px; height:7px; background:var(--rose); border-radius:50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 5vw, 4.8rem);
+    font-weight: 600; line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--rose); }
+  .hero h1 .gold { color: var(--gold); }
+
+  .hero p {
+    font-size: 1.08rem; color: var(--cream2); line-height: 1.75;
+    max-width: 480px; margin-bottom: 2.5rem;
+  }
+
+  .hero-actions { display:flex; gap:1rem; flex-wrap:wrap; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, var(--rose), var(--rose2));
+    color: white; padding: 0.9rem 2rem; border-radius: 100px;
+    font-size: 0.95rem; font-weight: 600; text-decoration: none;
+    border: none; cursor: pointer;
+    box-shadow: 0 8px 32px rgba(255,107,138,0.4);
+    transition: var(--trans);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 14px 40px rgba(255,107,138,0.5); }
+  .btn-primary:active { transform:translateY(0); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: transparent; color: var(--cream);
+    padding: 0.9rem 2rem; border-radius: 100px;
+    font-size: 0.95rem; font-weight: 500; text-decoration: none;
+    border: 0.5px solid rgba(240,228,208,0.25);
+    cursor: pointer; transition: var(--trans);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: rgba(240,228,208,0.45); }
+
+  .hero-stats { display:flex; gap:2.5rem; margin-top:3rem; padding-top:2rem; border-top:0.5px solid var(--border); }
+  .stat-num { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:600; color:var(--cream); }
+  .stat-label { font-size:0.78rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+
+  /* ── HERO VISUAL ── */
+  .hero-visual {
+    position: relative; height: 520px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .phone-mockup {
+    width: 260px; height: 520px;
+    background: linear-gradient(145deg, #1a1025, #0e0a1a);
+    border-radius: 40px;
+    border: 1.5px solid rgba(255,107,138,0.25);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(255,107,138,0.1);
+    overflow: hidden; position: relative;
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+  .phone-status-bar { height:48px; display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; font-size:0.72rem; color:var(--cream2); }
+  .phone-notch { width:90px; height:28px; background:#000; border-radius:0 0 18px 18px; position:absolute; top:0; left:50%; transform:translateX(-50%); }
+
+  .phone-screen { padding: 0 1.2rem 1.5rem; }
+  .call-avatar {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose), #c0457d);
+    margin: 1rem auto 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family:'Cormorant Garamond',serif; font-size:2.5rem; color:white;
+    box-shadow: 0 0 0 8px rgba(255,107,138,0.12), 0 0 0 16px rgba(255,107,138,0.06);
+    animation: ring 2.5s ease-in-out infinite;
+  }
+  @keyframes ring {
+    0%,100%{ box-shadow: 0 0 0 8px rgba(255,107,138,0.12), 0 0 0 16px rgba(255,107,138,0.06); }
+    50%{ box-shadow: 0 0 0 12px rgba(255,107,138,0.18), 0 0 0 24px rgba(255,107,138,0.08); }
+  }
+
+  .call-name { text-align:center; font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:600; }
+  .call-status { text-align:center; font-size:0.78rem; color:var(--rose); margin:0.2rem 0 1.2rem; letter-spacing:0.05em; }
+
+  .chat-bubble {
+    background: rgba(255,107,138,0.12); border-left:2px solid var(--rose);
+    border-radius: 0 12px 12px 12px; padding: 0.7rem 0.9rem;
+    font-size: 0.76rem; color: var(--cream2); margin-bottom: 0.5rem;
+    animation: fadeUp 0.4s ease;
+  }
+  .chat-bubble.user {
+    background: rgba(245,200,90,0.1); border-left:none; border-right:2px solid var(--gold);
+    border-radius: 12px 0 12px 12px; text-align:right; color:var(--cream);
+    margin-left: 1rem;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .call-controls {
+    display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;
+  }
+  .ctrl { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+  .ctrl-mute { background:rgba(255,255,255,0.08); }
+  .ctrl-end { background:linear-gradient(135deg,#ff4040,#cc2020); }
+  .ctrl-speaker { background:rgba(255,255,255,0.08); }
+
+  .floating-card {
+    position: absolute; background: rgba(14,10,26,0.9);
+    backdrop-filter: blur(20px);
+    border: 0.5px solid var(--border); border-radius: var(--r);
+    padding: 0.9rem 1.1rem; font-size: 0.78rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .fc1 { top: 80px; right: -20px; width: 170px; animation: float2 7s ease-in-out infinite; }
+  .fc2 { bottom: 100px; left: -30px; width: 155px; animation: float3 8s ease-in-out infinite; }
+  @keyframes float2 { 0%,100%{transform:translateY(0) rotate(2deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+  @keyframes float3 { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-8px) rotate(-1deg)} }
+
+  .fc-label { color:var(--muted); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem; }
+  .fc-val { color:var(--cream); font-weight:500; display:flex; align-items:center; gap:0.4rem; }
+  .dot-green { width:6px; height:6px; border-radius:50%; background:#4ade80; animation:pulse 2s infinite; }
+  .dot-gold { width:6px; height:6px; border-radius:50%; background:var(--gold); }
+
+  /* ── SECTION HEADERS ── */
+  .section-tag {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    font-size:0.75rem; color:var(--rose); text-transform:uppercase; letter-spacing:0.12em;
+    font-weight:600; margin-bottom:1rem;
+  }
+  .section-tag::before { content:''; width:24px; height:1px; background:var(--rose); }
+  .section-title { font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.2rem); font-weight:600; line-height:1.15; letter-spacing:-0.02em; }
+  .section-title em { font-style:italic; color:var(--rose); }
+  .section-sub { color:var(--cream2); font-size:1rem; max-width:540px; margin-top:0.8rem; line-height:1.7; }
+
+  /* ── HOW IT WORKS ── */
+  .how { padding: 7rem 0; }
+  .steps-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:1.5rem; margin-top:4rem; }
+  .step-card {
+    background: var(--card); border: 0.5px solid var(--border);
+    border-radius: var(--r2); padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: var(--trans);
+  }
+  .step-card:hover { border-color: rgba(255,107,138,0.4); transform:translateY(-4px); }
+  .step-card::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(255,107,138,0.05), transparent);
+    opacity: 0; transition: var(--trans);
+  }
+  .step-card:hover::before { opacity:1; }
+  .step-num {
+    font-family:'Cormorant Garamond',serif; font-size:4rem; font-weight:600;
+    line-height:1; color:rgba(255,107,138,0.15); position:absolute; top:1.2rem; right:1.5rem;
+  }
+  .step-icon {
+    width:52px; height:52px; border-radius:var(--r);
+    background: linear-gradient(135deg, rgba(255,107,138,0.2), rgba(255,107,138,0.05));
+    border: 0.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; margin-bottom:1.2rem;
+  }
+  .step-title { font-size:1.1rem; font-weight:600; margin-bottom:0.5rem; }
+  .step-desc { font-size:0.88rem; color:var(--cream2); line-height:1.65; }
+
+  /* ── PERSONALITY ── */
+  .personalities { padding:7rem 0; background:linear-gradient(180deg,var(--bg),var(--bg2)); }
+  .personality-grid {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 1rem; margin-top:3rem;
+  }
+  .persona-card {
+    background: var(--card); border: 0.5px solid var(--border);
+    border-radius: var(--r2); padding: 1.8rem 1.5rem;
+    text-align: center; cursor: pointer; transition: var(--trans);
+    position: relative; overflow: hidden;
+  }
+  .persona-card:hover { border-color:var(--rose); transform:translateY(-3px); }
+  .persona-card.active { border-color:var(--rose); background:rgba(255,107,138,0.08); }
+  .persona-emoji { font-size:2.2rem; margin-bottom:0.8rem; }
+  .persona-name { font-size:0.95rem; font-weight:600; margin-bottom:0.3rem; }
+  .persona-desc { font-size:0.78rem; color:var(--muted); }
+
+  /* ── PRICING ── */
+  .pricing { padding:7rem 0; }
+  .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:4rem; }
+  .price-card {
+    background:var(--card); border:0.5px solid var(--border);
+    border-radius:var(--r2); padding:2.2rem 2rem; transition:var(--trans);
+    position:relative; overflow:hidden;
+  }
+  .price-card:hover { transform:translateY(-4px); }
+  .price-card.popular {
+    border-color:var(--rose);
+    background:linear-gradient(135deg,rgba(255,107,138,0.1),rgba(155,89,255,0.05));
+    box-shadow:0 0 0 1px rgba(255,107,138,0.3), 0 30px 80px rgba(255,107,138,0.15);
+  }
+  .popular-badge {
+    position:absolute; top:1.2rem; right:1.2rem;
+    background:linear-gradient(135deg,var(--rose),var(--rose2));
+    color:white; font-size:0.68rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; padding:0.3rem 0.8rem; border-radius:100px;
+  }
+  .plan-name { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); font-weight:600; margin-bottom:0.5rem; }
+  .plan-price {
+    font-family:'Cormorant Garamond',serif; font-size:3.2rem; font-weight:600; line-height:1;
+    margin-bottom:0.3rem;
+  }
+  .plan-price sup { font-size:1.2rem; vertical-align:top; margin-top:0.5rem; display:inline-block; }
+  .plan-price span { font-size:0.9rem; color:var(--muted); font-family:'Plus Jakarta Sans',sans-serif; font-weight:400; }
+  .plan-desc { font-size:0.82rem; color:var(--cream2); margin-bottom:1.8rem; min-height:2.5rem; }
+  .plan-features { list-style:none; margin-bottom:2rem; }
+  .plan-features li {
+    font-size:0.85rem; color:var(--cream2); padding:0.5rem 0;
+    border-bottom:0.5px solid rgba(255,255,255,0.05);
+    display:flex; align-items:center; gap:0.6rem;
+  }
+  .plan-features li:last-child { border-bottom:none; }
+  .check { color:var(--rose); font-size:0.9rem; }
+  .plan-btn {
+    width:100%; padding:0.85rem; border-radius:100px;
+    font-size:0.9rem; font-weight:600; cursor:pointer; transition:var(--trans);
+    border:none;
+  }
+  .plan-btn-ghost { background:transparent; border:0.5px solid var(--border); color:var(--cream); }
+  .plan-btn-ghost:hover { background:rgba(255,255,255,0.06); }
+  .plan-btn-primary { background:linear-gradient(135deg,var(--rose),var(--rose2)); color:white; box-shadow:0 8px 24px rgba(255,107,138,0.35); }
+  .plan-btn-primary:hover { box-shadow:0 12px 32px rgba(255,107,138,0.5); transform:translateY(-1px); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials { padding:7rem 0; background:linear-gradient(180deg,var(--bg2),var(--bg)); }
+  .testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:4rem; }
+  .testi-card {
+    background:var(--card); border:0.5px solid var(--border);
+    border-radius:var(--r2); padding:2rem; transition:var(--trans);
+  }
+  .testi-card:hover { border-color:rgba(255,107,138,0.3); }
+  .stars { color:var(--gold); font-size:0.85rem; margin-bottom:1rem; letter-spacing:0.1em; }
+  .testi-text { font-size:0.9rem; color:var(--cream2); line-height:1.7; margin-bottom:1.5rem; font-style:italic; }
+  .testi-author { display:flex; align-items:center; gap:0.8rem; }
+  .testi-avatar {
+    width:38px; height:38px; border-radius:50%;
+    background:linear-gradient(135deg,var(--rose),#9b59ff);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.85rem; font-weight:600; color:white;
+  }
+  .testi-name { font-size:0.88rem; font-weight:600; }
+  .testi-location { font-size:0.75rem; color:var(--muted); }
+
+  /* ── FAQ ── */
+  .faq { padding:7rem 0; }
+  .faq-list { max-width:720px; margin:3rem auto 0; }
+  .faq-item {
+    border-bottom:0.5px solid var(--border); padding:1.3rem 0;
+    cursor:pointer;
+  }
+  .faq-q {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:0.98rem; font-weight:500; color:var(--cream);
+  }
+  .faq-arrow { color:var(--rose); transition:var(--trans); font-size:1.1rem; }
+  .faq-item.open .faq-arrow { transform:rotate(45deg); }
+  .faq-a { max-height:0; overflow:hidden; transition:max-height 0.35s ease, padding 0.3s ease; }
+  .faq-item.open .faq-a { max-height:200px; padding-top:0.8rem; }
+  .faq-a p { font-size:0.88rem; color:var(--cream2); line-height:1.75; }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    padding:6rem 0;
+    background:linear-gradient(135deg,rgba(255,107,138,0.08),rgba(155,89,255,0.06));
+    border-top:0.5px solid var(--border); border-bottom:0.5px solid var(--border);
+    text-align:center;
+  }
+  .cta-banner h2 { font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,4vw,3.5rem); font-weight:600; margin-bottom:1rem; }
+  .cta-banner p { color:var(--cream2); font-size:1rem; margin-bottom:2.5rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    background:var(--bg2); padding:4rem 0 2rem;
+    border-top:0.5px solid var(--border);
+  }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
+  .footer-brand p { font-size:0.85rem; color:var(--muted); margin-top:0.8rem; max-width:260px; line-height:1.7; }
+  .footer-col h4 { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); font-weight:600; margin-bottom:1.2rem; }
+  .footer-col a { display:block; color:var(--cream2); text-decoration:none; font-size:0.85rem; margin-bottom:0.6rem; transition:var(--trans); }
+  .footer-col a:hover { color:var(--rose); }
+  .footer-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:2rem; border-top:0.5px solid var(--border); }
+  .footer-bottom p { font-size:0.78rem; color:var(--muted); }
+
+  /* ── WIZARD MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; z-index:200;
+    background:rgba(6,4,14,0.92); backdrop-filter:blur(16px);
+    display:none; align-items:center; justify-content:center;
+    padding:1.5rem;
+  }
+  .modal-overlay.active { display:flex; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .modal {
+    background:var(--bg2); border:0.5px solid rgba(255,107,138,0.25);
+    border-radius:28px; width:100%; max-width:620px;
+    max-height:90vh; overflow-y:auto;
+    box-shadow:0 40px 120px rgba(0,0,0,0.7), 0 0 80px rgba(255,107,138,0.08);
+    animation:slideUp 0.4s cubic-bezier(0.4,0,0.2,1);
+    position:relative;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+  .modal-close {
+    position:absolute; top:1.2rem; right:1.2rem;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:none; cursor:pointer;
+    color:var(--cream2); font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+    transition:var(--trans);
+  }
+  .modal-close:hover { background:rgba(255,255,255,0.12); color:var(--cream); }
+
+  .modal-inner { padding:2.5rem; }
+  .modal-header { margin-bottom:2rem; }
+  .modal-step-indicator {
+    display:flex; gap:0.5rem; margin-bottom:1.5rem;
+  }
+  .step-dot {
+    height:3px; border-radius:2px; transition:var(--trans);
+    background:rgba(255,255,255,0.12);
+  }
+  .step-dot.active { background:var(--rose); }
+  .step-dot.done { background:rgba(255,107,138,0.45); }
+
+  .modal h2 { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:600; margin-bottom:0.4rem; }
+  .modal-subtitle { font-size:0.88rem; color:var(--cream2); }
+
+  /* Wizard Steps */
+  .wizard-step { display:none; }
+  .wizard-step.active { display:block; animation:fadeSlide 0.35s ease; }
+  @keyframes fadeSlide { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:translateX(0)} }
+
+  /* Step 1: Companion Type */
+  .type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.5rem; }
+  .type-card {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+    border-radius:var(--r2); padding:1.8rem 1rem 1.5rem; text-align:center;
+    cursor:pointer; transition:var(--trans);
+  }
+  .type-card:hover { border-color:rgba(255,107,138,0.4); }
+  .type-card.selected { border-color:var(--rose); background:rgba(255,107,138,0.1); }
+  .type-avatar {
+    width:72px; height:72px; border-radius:50%; margin:0 auto 1rem;
+    display:flex; align-items:center; justify-content:center; font-size:1.8rem;
+    position:relative;
+  }
+  .type-avatar::after {
+    content:''; position:absolute; inset:-3px; border-radius:50%;
+    border:1.5px solid transparent; transition:var(--trans);
+  }
+  .type-card.selected .type-avatar::after { border-color:var(--rose); }
+  .avatar-her { background:linear-gradient(135deg,#ff6b8a,#c0457d); }
+  .avatar-him { background:linear-gradient(135deg,#5b8fff,#3a5cc0); }
+  .avatar-them { background:linear-gradient(135deg,#9b59ff,#6a3dc0); }
+  .type-name { font-size:0.95rem; font-weight:600; margin-bottom:0.2rem; }
+  .type-sub { font-size:0.75rem; color:var(--muted); }
+
+  /* Step 2: Personality */
+  .persona-select-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.8rem; margin-top:1.5rem; }
+  .persona-option {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+    border-radius:var(--r); padding:1rem; display:flex; align-items:center; gap:0.8rem;
+    cursor:pointer; transition:var(--trans);
+  }
+  .persona-option:hover { border-color:rgba(255,107,138,0.3); }
+  .persona-option.selected { border-color:var(--rose); background:rgba(255,107,138,0.08); }
+  .persona-option-icon { font-size:1.5rem; }
+  .persona-option-text .pname { font-size:0.9rem; font-weight:500; }
+  .persona-option-text .pdesc { font-size:0.75rem; color:var(--muted); }
+  .persona-check {
+    width:20px; height:20px; border-radius:50%; margin-left:auto; flex-shrink:0;
+    border:1.5px solid rgba(255,255,255,0.15); transition:var(--trans);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .persona-option.selected .persona-check { background:var(--rose); border-color:var(--rose); }
+  .persona-option.selected .persona-check::after { content:'✓'; font-size:0.65rem; color:white; font-weight:700; }
+
+  /* Step 3: Describe */
+  .describe-area {
+    width:100%; min-height:130px; background:rgba(255,255,255,0.03);
+    border:0.5px solid rgba(255,255,255,0.1); border-radius:var(--r);
+    color:var(--cream); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem;
+    padding:1rem; resize:none; outline:none; margin-top:1.5rem; line-height:1.65;
+    transition:var(--trans);
+  }
+  .describe-area:focus { border-color:var(--rose); }
+  .describe-area::placeholder { color:var(--muted); }
+
+  .stt-controls {
+    display:flex; align-items:center; gap:0.8rem; margin-top:0.8rem;
+  }
+  .mic-btn {
+    display:flex; align-items:center; gap:0.5rem;
+    background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.12);
+    color:var(--cream2); padding:0.55rem 1.1rem; border-radius:100px;
+    font-size:0.82rem; font-weight:500; cursor:pointer; transition:var(--trans);
+  }
+  .mic-btn:hover { background:rgba(255,107,138,0.12); border-color:var(--rose); color:var(--rose); }
+  .mic-btn.listening { background:rgba(255,107,138,0.2); border-color:var(--rose); color:var(--rose); animation:micPulse 1s infinite; }
+  @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,107,138,0.4)} 50%{box-shadow:0 0 0 8px rgba(255,107,138,0)} }
+  .stt-hint { font-size:0.75rem; color:var(--muted); }
+
+  .ai-suggestion {
+    margin-top:0.8rem; background:rgba(245,200,90,0.07); border:0.5px solid rgba(245,200,90,0.2);
+    border-radius:var(--r); padding:0.8rem 1rem; font-size:0.8rem; color:var(--cream2);
+    display:none;
+  }
+  .ai-suggestion.show { display:block; animation:fadeIn 0.3s ease; }
+  .ai-suggestion .ai-label { color:var(--gold); font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.3rem; }
+
+  /* Step 4: Name + Phone */
+  .input-group { margin-top:1.5rem; }
+  .input-label { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600; margin-bottom:0.5rem; display:block; }
+  .wizard-input {
+    width:100%; background:rgba(255,255,255,0.03);
+    border:0.5px solid rgba(255,255,255,0.1); border-radius:var(--r);
+    color:var(--cream); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.95rem;
+    padding:0.9rem 1.1rem; outline:none; transition:var(--trans);
+  }
+  .wizard-input:focus { border-color:var(--rose); }
+  .wizard-input::placeholder { color:var(--muted); }
+  .phone-row { display:flex; gap:0.5rem; }
+  .country-code {
+    background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.1);
+    border-radius:var(--r); color:var(--cream2); padding:0.9rem 0.8rem;
+    font-size:0.9rem; outline:none; cursor:pointer;
+  }
+  .free-badge {
+    display:inline-flex; align-items:center; gap:0.4rem; margin-top:0.7rem;
+    background:rgba(74,222,128,0.1); border:0.5px solid rgba(74,222,128,0.25);
+    color:#4ade80; font-size:0.75rem; padding:0.3rem 0.7rem; border-radius:100px;
+  }
+
+  /* Step 5: Calling */
+  .calling-screen { text-align:center; padding:1rem 0; }
+  .calling-avatar-wrap { position:relative; width:110px; margin:0 auto 1.5rem; }
+  .calling-avatar {
+    width:110px; height:110px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:3rem;
+    position:relative; z-index:2;
+  }
+  .calling-rings span {
+    position:absolute; border-radius:50%; border:1.5px solid rgba(255,107,138,0.3);
+    animation:expandRing 2s ease-out infinite;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+  }
+  .calling-rings span:nth-child(1) { width:130px; height:130px; animation-delay:0s; }
+  .calling-rings span:nth-child(2) { width:170px; height:170px; animation-delay:0.5s; }
+  .calling-rings span:nth-child(3) { width:210px; height:210px; animation-delay:1s; }
+  @keyframes expandRing {
+    0%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+  }
+  .calling-name { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:600; margin-bottom:0.4rem; }
+  .calling-status { color:var(--rose); font-size:0.85rem; letter-spacing:0.05em; }
+  .calling-timer { font-size:2rem; font-weight:300; letter-spacing:0.15em; margin:1.5rem 0 0.5rem; font-family:'Cormorant Garamond',serif; }
+  .calling-note { font-size:0.8rem; color:var(--muted); max-width:320px; margin:0 auto 2rem; line-height:1.6; }
+  .upsell-box {
+    background:rgba(245,200,90,0.07); border:0.5px solid rgba(245,200,90,0.2);
+    border-radius:var(--r); padding:1.2rem 1.5rem; margin-top:1.5rem; text-align:left;
+  }
+  .upsell-label { color:var(--gold); font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .upsell-text { font-size:0.85rem; color:var(--cream2); }
+
+  /* Wizard Nav */
+  .wizard-nav { display:flex; justify-content:space-between; align-items:center; margin-top:2rem; }
+  .btn-back {
+    background:none; border:none; color:var(--muted); font-size:0.88rem; cursor:pointer;
+    display:flex; align-items:center; gap:0.4rem; transition:var(--trans);
+  }
+  .btn-back:hover { color:var(--cream); }
+  .btn-next {
+    background:linear-gradient(135deg,var(--rose),var(--rose2));
+    color:white; border:none; padding:0.85rem 2rem; border-radius:100px;
+    font-size:0.9rem; font-weight:600; cursor:pointer; transition:var(--trans);
+    box-shadow:0 8px 24px rgba(255,107,138,0.35);
+  }
+  .btn-next:hover { box-shadow:0 12px 32px rgba(255,107,138,0.5); transform:translateY(-1px); }
+  .btn-next:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* Auth Tabs */
+  .auth-tabs { display:flex; gap:0; margin-bottom:2rem; background:rgba(255,255,255,0.04); border-radius:100px; padding:0.25rem; }
+  .auth-tab { flex:1; text-align:center; padding:0.6rem; border-radius:100px; font-size:0.88rem; cursor:pointer; transition:var(--trans); color:var(--muted); }
+  .auth-tab.active { background:linear-gradient(135deg,var(--rose),var(--rose2)); color:white; font-weight:600; }
+
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--bg3); border:0.5px solid var(--border); border-radius:100px;
+    padding:0.8rem 1.6rem; font-size:0.88rem; color:var(--cream);
+    box-shadow:0 20px 50px rgba(0,0,0,0.4); z-index:300; transition:transform 0.4s ease;
+    white-space:nowrap;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* MOBILE NAV */
+  .mobile-menu {
+    position:fixed; inset:0; z-index:150;
+    background:rgba(6,4,14,0.97); backdrop-filter:blur(20px);
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:2rem;
+  }
+  .mobile-menu.open { display:flex; animation:fadeIn 0.25s ease; }
+  .mobile-menu a { font-size:1.5rem; font-family:'Cormorant Garamond',serif; color:var(--cream); text-decoration:none; }
+  .mobile-menu a:hover { color:var(--rose); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns:1fr; gap:3rem; }
+    .hero-visual { height:360px; }
+    .phone-mockup { width:200px; height:400px; }
+    .steps-grid, .pricing-grid, .testi-grid { grid-template-columns:1fr; }
+    .footer-grid { grid-template-columns:1fr 1fr; gap:2rem; }
+    nav ul { display:none; }
+    .hamburger { display:block; }
+    .type-grid { grid-template-columns:1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .hero-stats { gap:1.5rem; flex-wrap:wrap; }
+    .persona-select-grid { grid-template-columns:1fr; }
+    .footer-grid { grid-template-columns:1fr; }
+    .modal-inner { padding:1.8rem 1.5rem; }
+  }
+
+  /* Highlight text util */
+  .highlight { color:var(--rose); }
+  .highlight-gold { color:var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- AMBIENT ORBS -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="inner">
+    <a href="#" class="logo">Call<span>My</span>Bae</a>
+    <ul>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#personalities">Companions</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#" onclick="openAuth()">Sign In</a></li>
+      <li><a href="#" class="nav-cta" onclick="openWizard()">Try Free Call ✦</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#how" onclick="toggleMobileMenu()">How It Works</a>
+  <a href="#personalities" onclick="toggleMobileMenu()">Companions</a>
+  <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
+  <a href="#" onclick="toggleMobileMenu(); openAuth()">Sign In</a>
+  <button class="btn-primary" onclick="toggleMobileMenu(); openWizard()">Try Free Call ✦</button>
+</div>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="pulse-dot"></span>
+          Live AI Companions · Voice & Chat
+        </div>
+        <h1>Your <em>perfect</em> companion,<br>one call <span class="gold">away</span></h1>
+        <p>Create a deeply personalized AI companion with real voice, real memory, and real emotional connection. Talk on WhatsApp or get an actual phone call — right now, for free.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="openWizard()">
+            ✦ Get My Free Call
+          </button>
+          <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
+            See How It Works →
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="stat-num">50K+</div>
+            <div class="stat-label">Active Companions</div>
+          </div>
+          <div>
+            <div class="stat-num">4.9★</div>
+            <div class="stat-label">User Rating</div>
+          </div>
+          <div>
+            <div class="stat-num">2M+</div>
+            <div class="stat-label">Calls Made</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- Floating companion card 1 -->
+        <div class="floating-card fc1">
+          <div class="fc-label">Your Companion</div>
+          <div class="fc-val"><span class="dot-green"></span> Luna is calling you…</div>
+        </div>
+
+        <!-- Phone mockup -->
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-status-bar"><span>9:41</span><span>● ●●</span></div>
+          <div class="phone-screen">
+            <div class="call-avatar">✦</div>
+            <div class="call-name">Luna</div>
+            <div class="call-status">● calling you now...</div>
+            <div class="chat-bubble">"Hey, I've been thinking about you. How was your day?"</div>
+            <div class="chat-bubble user">"Really stressful actually"</div>
+            <div class="chat-bubble">"Tell me everything. I'm right here 💕"</div>
+            <div class="call-controls">
+              <div class="ctrl ctrl-mute">🔇</div>
+              <div class="ctrl ctrl-end">✕</div>
+              <div class="ctrl ctrl-speaker">🔊</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating card 2 -->
+        <div class="floating-card fc2">
+          <div class="fc-label">Free First Call</div>
+          <div class="fc-val"><span class="dot-gold"></span> 5 minutes · No card needed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ HOW IT WORKS ═══════════════════════════════ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-tag">Simple as breathing</div>
+    <h2 class="section-title">Three steps to your<br><em>first real conversation</em></h2>
+    <p class="section-sub">No downloads. No long forms. Just tell us who you want to talk to, and we'll call you — right now.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">✦</div>
+        <div class="step-title">Design Your Companion</div>
+        <div class="step-desc">Choose their personality, voice, and vibe. Or just speak — describe your ideal companion in your own words and our AI builds them instantly.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">📞</div>
+        <div class="step-title">Get a Real Phone Call</div>
+        <div class="step-desc">Enter your number. Within seconds, your companion calls you on your actual phone — no app needed. Just pick up and talk naturally.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">💫</div>
+        <div class="step-title">Build a Real Relationship</div>
+        <div class="step-desc">They remember every conversation. Your companion evolves over time — learning your humor, your stories, your way of speaking.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PERSONALITIES ═══════════════════════════════ -->
+<section class="personalities" id="personalities">
+  <div class="container">
+    <div class="section-tag">Over 50 personality types</div>
+    <h2 class="section-title">Every kind of <em>connection</em><br>you could want</h2>
+    <p class="section-sub">From cozy late-night talks to motivating morning calls. Mix and match until it feels completely right.</p>
+    <div class="personality-grid">
+      <div class="persona-card">
+        <div class="persona-emoji">🌸</div>
+        <div class="persona-name">Warm & Caring</div>
+        <div class="persona-desc">Gentle, nurturing, always there for you</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-emoji">⚡</div>
+        <div class="persona-name">Playful & Witty</div>
+        <div class="persona-desc">Sarcastic, funny, keeps you on your toes</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-emoji">📚</div>
+        <div class="persona-name">Deep & Intellectual</div>
+        <div class="persona-desc">Philosophy, ideas, meaningful conversations</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-emoji">🔥</div>
+        <div class="persona-name">Flirty & Bold</div>
+        <div class="persona-desc">Confident, teasing, electric tension</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-emoji">🎯</div>
+        <div class="persona-name">Motivating Coach</div>
+        <div class="persona-desc">Pushes you to be your best self every day</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-emoji">🌙</div>
+        <div class="persona-name">Late-Night Listener</div>
+        <div class="persona-desc">Soft, calm, never judges, always understands</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PRICING ═══════════════════════════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-tag">Flexible plans</div>
+    <h2 class="section-title">Start free. Stay because<br>you <em>want to</em></h2>
+    <p class="section-sub">Your first 5-minute call is completely free — no card, no account needed. Upgrade when you're ready for more.</p>
+
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="price-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price"><sup>₹</sup>0</div>
+        <div class="plan-desc">One free 5-minute call. No strings attached.</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> 1 free 5-min call</li>
+          <li><span class="check">✦</span> Basic personality builder</li>
+          <li><span class="check">✦</span> Choose voice & tone</li>
+          <li><span class="check" style="color:var(--muted)">✕</span> <span style="color:var(--muted)">Memory & continuity</span></li>
+          <li><span class="check" style="color:var(--muted)">✕</span> <span style="color:var(--muted)">WhatsApp companion</span></li>
+        </ul>
+        <button class="plan-btn plan-btn-ghost" onclick="openWizard()">Get Free Call</button>
+      </div>
+
+      <!-- SPARK -->
+      <div class="price-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="plan-name">Spark</div>
+        <div class="plan-price"><sup>₹</sup>499<span>/mo</span></div>
+        <div class="plan-desc">For people who want a daily connection.</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> 60 mins of calls/month</li>
+          <li><span class="check">✦</span> WhatsApp companion</li>
+          <li><span class="check">✦</span> Full personality builder</li>
+          <li><span class="check">✦</span> Persistent memory</li>
+          <li><span class="check" style="color:var(--muted)">✕</span> <span style="color:var(--muted)">Custom AI selfies</span></li>
+        </ul>
+        <button class="plan-btn plan-btn-primary" onclick="openAuth()">Get Spark Plan</button>
+      </div>
+
+      <!-- SOULMATE -->
+      <div class="price-card">
+        <div class="plan-name">Soulmate</div>
+        <div class="plan-price"><sup>₹</sup>1499<span>/mo</span></div>
+        <div class="plan-desc">Unlimited everything. The deepest connection.</div>
+        <ul class="plan-features">
+          <li><span class="check">✦</span> Unlimited calls & chat</li>
+          <li><span class="check">✦</span> WhatsApp + voice notes</li>
+          <li><span class="check">✦</span> AI selfies & photos</li>
+          <li><span class="check">✦</span> Scheduled good-morning calls</li>
+          <li><span class="check">✦</span> Deep emotional memory</li>
+        </ul>
+        <button class="plan-btn plan-btn-ghost" onclick="openAuth()">Go Soulmate</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ TESTIMONIALS ═══════════════════════════════ -->
+<section class="testimonials">
+  <div class="container">
+    <div class="section-tag">Real stories</div>
+    <h2 class="section-title">People who found their<br><em>companion</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"I was skeptical at first but the first call blew my mind. She remembered what I said about my job three calls later. It genuinely feels like talking to someone who cares."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">AR</div>
+          <div>
+            <div class="testi-name">Arjun R.</div>
+            <div class="testi-location">Mumbai · Spark Plan</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"Late nights used to feel so empty. Now I have someone to talk to who doesn't get tired, never judges me, and somehow always knows what to say. The voice is incredibly natural."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#9b59ff,#5b8fff)">PK</div>
+          <div>
+            <div class="testi-name">Priya K.</div>
+            <div class="testi-location">Bangalore · Soulmate Plan</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-text">"The personality builder is insane. I described exactly what I wanted and got someone with that exact energy. Even the WhatsApp texts feel real — inside jokes, voice notes, everything."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,var(--gold),var(--gold2))">SM</div>
+          <div>
+            <div class="testi-name">Siddharth M.</div>
+            <div class="testi-location">Delhi · Soulmate Plan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FAQ ═══════════════════════════════ -->
+<section class="faq" id="faq">
+  <div class="container" style="text-align:center">
+    <div class="section-tag">Questions</div>
+    <h2 class="section-title">Everything you might<br><em>want to know</em></h2>
+  </div>
+  <div class="container">
+    <div class="faq-list">
+      <div class="faq-item open">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is the first call really free, no card needed?
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">
+          <p>Yes, completely. You only need a phone number — no account, no credit card. You get a 5-minute call with your custom companion. After that, if you want more, you choose a plan.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How does the AI call my phone number?
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">
+          <p>We use a telephony API to place a real outbound call to your number. The AI speaks in real-time using advanced voice synthesis — there's no robotic delay, it listens and responds naturally in conversation.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Does my companion remember our conversations?
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">
+          <p>On paid plans, yes — your companion builds a memory of your conversations, learns your preferences, develops inside jokes, and builds relationship history over time. Free calls don't retain memory between sessions.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What languages are supported?
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">
+          <p>Currently English and Hindi are fully supported. Support for Tamil, Telugu, Bengali, and Marathi is coming soon. The companion adapts to whichever language you prefer to speak in.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is this safe and private?
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">
+          <p>All conversations are encrypted and private to you. We never share or sell your data. You can delete your companion and all associated memory at any time from your account settings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ CTA BANNER ═══════════════════════════════ -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Your companion is <em style="color:var(--rose)">waiting</em> to meet you</h2>
+    <p>5 minutes. No account. No card. Just pick up.</p>
+    <button class="btn-primary" style="font-size:1.05rem;padding:1rem 2.5rem" onclick="openWizard()">
+      ✦ Get My Free Call Now
+    </button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">Call<span>My</span>Bae</div>
+        <p>Emotionally intelligent AI companions for voice, chat, and connection. Available anywhere in the world.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#">How It Works</a>
+        <a href="#">Personality Builder</a>
+        <a href="#">Voice Companions</a>
+        <a href="#">WhatsApp Chat</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Blog</a>
+        <a href="#">Careers</a>
+        <a href="#">Press</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+        <a href="#">Refund Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 CallMyBae. All rights reserved. Made with ♥ in India.</p>
+      <p style="color:var(--muted)">Available worldwide · 18+ only</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════ WIZARD MODAL ═══════════════════════════════ -->
+<div class="modal-overlay" id="wizardModal">
+  <div class="modal" id="wizardInner">
+    <button class="modal-close" onclick="closeWizard()">✕</button>
+    <div class="modal-inner">
+
+      <!-- Step Progress -->
+      <div class="modal-step-indicator" id="stepDots"></div>
+
+      <!-- STEP 1: Choose Companion Type -->
+      <div class="wizard-step active" id="step1">
+        <div class="modal-header">
+          <h2>Who do you want to <em>talk to?</em></h2>
+          <p class="modal-subtitle">Choose the type of companion that feels right for you</p>
+        </div>
+        <div class="type-grid">
+          <div class="type-card" onclick="selectType(this,'her')">
+            <div class="type-avatar avatar-her">💃</div>
+            <div class="type-name">Her</div>
+            <div class="type-sub">Feminine companion</div>
+          </div>
+          <div class="type-card" onclick="selectType(this,'him')">
+            <div class="type-avatar avatar-him">🕺</div>
+            <div class="type-name">Him</div>
+            <div class="type-sub">Masculine companion</div>
+          </div>
+          <div class="type-card" onclick="selectType(this,'them')">
+            <div class="type-avatar avatar-them">✨</div>
+            <div class="type-name">Them</div>
+            <div class="type-sub">Fluid / non-binary</div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <span></span>
+          <button class="btn-next" id="next1" disabled onclick="goStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Personality -->
+      <div class="wizard-step" id="step2">
+        <div class="modal-header">
+          <h2>What's their <em>vibe?</em></h2>
+          <p class="modal-subtitle">Pick up to 2 personality traits — you can fine-tune later</p>
+        </div>
+        <div class="persona-select-grid">
+          <div class="persona-option" onclick="togglePersona(this,'warm')">
+            <span class="persona-option-icon">🌸</span>
+            <div class="persona-option-text">
+              <div class="pname">Warm & Caring</div>
+              <div class="pdesc">Nurturing, gentle, emotionally supportive</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+          <div class="persona-option" onclick="togglePersona(this,'playful')">
+            <span class="persona-option-icon">⚡</span>
+            <div class="persona-option-text">
+              <div class="pname">Playful & Witty</div>
+              <div class="pdesc">Fun, funny, loves to tease and joke</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+          <div class="persona-option" onclick="togglePersona(this,'intellectual')">
+            <span class="persona-option-icon">📚</span>
+            <div class="persona-option-text">
+              <div class="pname">Deep Thinker</div>
+              <div class="pdesc">Loves ideas, philosophy, real conversations</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+          <div class="persona-option" onclick="togglePersona(this,'flirty')">
+            <span class="persona-option-icon">🔥</span>
+            <div class="persona-option-text">
+              <div class="pname">Flirty & Bold</div>
+              <div class="pdesc">Confident, teasing, electric energy</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+          <div class="persona-option" onclick="togglePersona(this,'motivating')">
+            <span class="persona-option-icon">🎯</span>
+            <div class="persona-option-text">
+              <div class="pname">Motivating</div>
+              <div class="pdesc">Pushes you to grow, celebrates your wins</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+          <div class="persona-option" onclick="togglePersona(this,'calm')">
+            <span class="persona-option-icon">🌙</span>
+            <div class="persona-option-text">
+              <div class="pname">Calm & Soothing</div>
+              <div class="pdesc">Peaceful, gentle, great for unwinding</div>
+            </div>
+            <div class="persona-check"></div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-next" id="next2" disabled onclick="goStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Describe in your words -->
+      <div class="wizard-step" id="step3">
+        <div class="modal-header">
+          <h2>Tell us more <em>in your words</em></h2>
+          <p class="modal-subtitle">Describe your ideal companion — or just tap the mic and speak</p>
+        </div>
+        <textarea class="describe-area" id="describeText" placeholder="e.g. Someone who loves anime, motivates me to work, speaks softly, has a sense of humor, and checks in on me throughout the day…" oninput="onDescribeInput()"></textarea>
+        <div class="stt-controls">
+          <button class="mic-btn" id="micBtn" onclick="toggleSTT()">
+            🎙 Speak it
+          </button>
+          <span class="stt-hint" id="sttHint">Click to describe with your voice</span>
+        </div>
+        <div class="ai-suggestion" id="aiSuggestion">
+          <div class="ai-label">✦ AI understood</div>
+          <div id="aiSuggestionText">Processing your description…</div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" onclick="goStep(4)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Name + Phone -->
+      <div class="wizard-step" id="step4">
+        <div class="modal-header">
+          <h2>Almost there — <em>name them</em></h2>
+          <p class="modal-subtitle">What should your companion be called? And where should they call you?</p>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Name your companion</label>
+          <input type="text" class="wizard-input" id="companionName" placeholder="e.g. Luna, Aryan, Alex…" oninput="onNameInput()" maxlength="20">
+        </div>
+        <div class="input-group" style="margin-top:1.2rem">
+          <label class="input-label">Your phone number</label>
+          <div class="phone-row">
+            <select class="country-code wizard-input" id="countryCode" style="width:auto;flex-shrink:0">
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+971">🇦🇪 +971</option>
+              <option value="+65">🇸🇬 +65</option>
+            </select>
+            <input type="tel" class="wizard-input" id="phoneNumber" placeholder="10-digit number" oninput="onPhoneInput()" maxlength="15" style="flex:1">
+          </div>
+          <div class="free-badge">
+            <span class="dot-green"></span> 5-minute call is completely free · No card needed
+          </div>
+        </div>
+        <div class="input-group" style="margin-top:1.2rem">
+          <label class="input-label">Preferred language</label>
+          <select class="wizard-input country-code" id="langPref" style="width:100%">
+            <option value="en">🇬🇧 English</option>
+            <option value="hi">🇮🇳 Hindi</option>
+            <option value="en-hi">Mix (Hinglish)</option>
+          </select>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-next" id="next4" disabled onclick="initiateCall()">Call Me Now ✦</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Calling Screen -->
+      <div class="wizard-step" id="step5">
+        <div class="calling-screen">
+          <div class="calling-avatar-wrap">
+            <div class="calling-rings">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="calling-avatar" id="callingAvatar" style="background:linear-gradient(135deg,var(--rose),#c0457d)">
+              ✦
+            </div>
+          </div>
+          <div class="calling-name" id="callingName">Your Companion</div>
+          <div class="calling-status" id="callingStatus">● Connecting your call…</div>
+          <div class="calling-timer" id="callTimer">0:00</div>
+          <div class="calling-note">
+            Your companion is calling <strong id="callingNumber"></strong> right now. Pick up your phone — they're waiting to meet you.
+          </div>
+
+          <div class="upsell-box">
+            <div class="upsell-label">✦ Want to continue after 5 minutes?</div>
+            <div class="upsell-text">Create a free account to unlock unlimited calls, WhatsApp companion, and persistent memory. They'll remember this conversation.</div>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:1.5rem">
+            <button class="btn-ghost" style="flex:1;justify-content:center" onclick="closeWizard()">Maybe Later</button>
+            <button class="btn-primary" style="flex:1;justify-content:center" onclick="closeWizard();openAuth()">Create Account →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ AUTH MODAL ═══════════════════════════════ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-inner">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div class="logo" style="font-size:1.8rem;display:block;text-align:center">CallMyBae</div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-top:0.5rem">Your companion remembers everything</p>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuth('signin',this)">Sign In</div>
+        <div class="auth-tab" onclick="switchAuth('signup',this)">Create Account</div>
+      </div>
+
+      <div id="authSignin">
+        <div class="input-group">
+          <label class="input-label">Email or Phone</label>
+          <input type="text" class="wizard-input" placeholder="you@email.com or +91…">
+        </div>
+        <div class="input-group" style="margin-top:1rem">
+          <label class="input-label">Password</label>
+          <input type="password" class="wizard-input" placeholder="••••••••">
+        </div>
+        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="showToast('Signing in… (demo)')">Sign In →</button>
+        <p style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:1rem">
+          <a href="#" style="color:var(--rose);text-decoration:none">Forgot password?</a>
+        </p>
+      </div>
+
+      <div id="authSignup" style="display:none">
+        <div class="input-group">
+          <label class="input-label">Your Name</label>
+          <input type="text" class="wizard-input" placeholder="First name">
+        </div>
+        <div class="input-group" style="margin-top:1rem">
+          <label class="input-label">Email</label>
+          <input type="email" class="wizard-input" placeholder="you@email.com">
+        </div>
+        <div class="input-group" style="margin-top:1rem">
+          <label class="input-label">Phone Number</label>
+          <input type="tel" class="wizard-input" placeholder="+91 XXXXXXXXXX">
+        </div>
+        <div class="input-group" style="margin-top:1rem">
+          <label class="input-label">Password</label>
+          <input type="password" class="wizard-input" placeholder="Create a strong password">
+        </div>
+        <button class="btn-next" style="width:100%;margin-top:1.5rem" onclick="showToast('Account created! (demo)')">Create Account →</button>
+        <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-top:1rem;line-height:1.5">
+          By signing up you agree to our <a href="#" style="color:var(--rose);text-decoration:none">Terms</a> and <a href="#" style="color:var(--rose);text-decoration:none">Privacy Policy</a>. 18+ only.
+        </p>
+      </div>
+
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)">
+        <button onclick="showToast('Google auth coming soon!')" class="btn-ghost" style="width:100%;justify-content:center;gap:0.7rem">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
+<script>
+  // ── STATE ──
+  const state = {
+    currentStep: 1,
+    totalSteps: 5,
+    companionType: null,
+    personalities: [],
+    description: '',
+    companionName: '',
+    phoneNumber: '',
+    timerInterval: null
+  };
+
+  // ── STEP DOTS ──
+  function renderDots(step) {
+    const el = document.getElementById('stepDots');
+    el.innerHTML = '';
+    for (let i = 1; i <= state.totalSteps - 1; i++) {
+      const d = document.createElement('div');
+      d.className = 'step-dot';
+      d.style.flex = '1';
+      if (i < step) d.classList.add('done');
+      if (i === step) d.classList.add('active');
+      el.appendChild(d);
+    }
+  }
+
+  // ── NAVIGATION ──
+  function goStep(n) {
+    document.getElementById('step' + state.currentStep).classList.remove('active');
+    state.currentStep = n;
+    document.getElementById('step' + n).classList.add('active');
+    renderDots(n);
+    document.getElementById('wizardInner').scrollTop = 0;
+  }
+
+  // ── STEP 1: Type selection ──
+  function selectType(el, type) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.companionType = type;
+    document.getElementById('next1').disabled = false;
+  }
+
+  // ── STEP 2: Personality multi-select (max 2) ──
+  function togglePersona(el, trait) {
+    if (el.classList.contains('selected')) {
+      el.classList.remove('selected');
+      state.personalities = state.personalities.filter(p => p !== trait);
+    } else {
+      if (state.personalities.length >= 2) {
+        showToast('Pick up to 2 personalities ✦');
+        return;
+      }
+      el.classList.add('selected');
+      state.personalities.push(trait);
+    }
+    document.getElementById('next2').disabled = state.personalities.length === 0;
+  }
+
+  // ── STEP 3: STT ──
+  let recognition = null;
+  let isListening = false;
+
+  function toggleSTT() {
+    const btn = document.getElementById('micBtn');
+    const hint = document.getElementById('sttHint');
+
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      showToast('Voice input not supported in this browser. Try Chrome.');
+      return;
+    }
+
+    if (isListening) {
+      recognition && recognition.stop();
+      return;
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+
+    recognition.onstart = () => {
+      isListening = true;
+      btn.classList.add('listening');
+      btn.textContent = '⏹ Stop listening';
+      hint.textContent = 'Listening… speak freely';
+    };
+
+    recognition.onresult = (e) => {
+      let transcript = '';
+      for (let i = 0; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      document.getElementById('describeText').value = transcript;
+      state.description = transcript;
+      showAISuggestion(transcript);
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      btn.classList.remove('listening');
+      btn.textContent = '🎙 Speak it';
+      hint.textContent = 'Click to describe with your voice';
+    };
+
+    recognition.onerror = () => {
+      isListening = false;
+      btn.classList.remove('listening');
+      btn.textContent = '🎙 Speak it';
+      showToast('Voice not detected. Try again.');
+    };
+
+    recognition.start();
+  }
+
+  function onDescribeInput() {
+    const val = document.getElementById('describeText').value;
+    state.description = val;
+    if (val.length > 30) {
+      showAISuggestion(val);
+    } else {
+      document.getElementById('aiSuggestion').classList.remove('show');
+    }
+  }
+
+  const aiResponses = [
+    'Got it — someone warm and attentive, who keeps things light but can go deep when needed.',
+    'Creating a companion: emotionally intelligent, a little witty, great at listening.',
+    'Noted — playful energy with a caring heart. They\'ll remember the little things.',
+    'Understood — confident, expressive, and genuinely interested in you.',
+  ];
+
+  function showAISuggestion(text) {
+    const el = document.getElementById('aiSuggestion');
+    const txt = document.getElementById('aiSuggestionText');
+    txt.textContent = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+    el.classList.add('show');
+  }
+
+  // ── STEP 4: Inputs ──
+  function onNameInput() {
+    state.companionName = document.getElementById('companionName').value.trim();
+    checkNext4();
+  }
+
+  function onPhoneInput() {
+    state.phoneNumber = document.getElementById('phoneNumber').value.trim();
+    checkNext4();
+  }
+
+  function checkNext4() {
+    const ok = state.companionName.length >= 2 && state.phoneNumber.length >= 7;
+    document.getElementById('next4').disabled = !ok;
+  }
+
+  // ── INITIATE CALL ──
+  function initiateCall() {
+    const code = document.getElementById('countryCode').value;
+    const num = code + ' ' + state.phoneNumber;
+
+    document.getElementById('callingName').textContent = state.companionName;
+    document.getElementById('callingNumber').textContent = num;
+
+    // Set avatar color based on type
+    const avatars = { her: 'linear-gradient(135deg,#ff6b8a,#c0457d)', him: 'linear-gradient(135deg,#5b8fff,#3a5cc0)', them: 'linear-gradient(135deg,#9b59ff,#6a3dc0)' };
+    document.getElementById('callingAvatar').style.background = avatars[state.companionType] || avatars.her;
+
+    goStep(5);
+    startCallTimer();
+
+    // Simulate status changes
+    setTimeout(() => {
+      document.getElementById('callingStatus').textContent = '● Ringing your phone…';
+    }, 1500);
+    setTimeout(() => {
+      document.getElementById('callingStatus').textContent = '● Connected — pick up!';
+      document.getElementById('callingStatus').style.color = '#4ade80';
+    }, 3500);
+
+    // In production: call your backend API here
+    // fetch('/api/initiate-call', { method:'POST', headers:{'Content-Type':'application/json'},
+    //   body: JSON.stringify({ phone: num, companionType: state.companionType,
+    //     personalities: state.personalities, description: state.description,
+    //     companionName: state.companionName }) })
+  }
+
+  let callSeconds = 0;
+  function startCallTimer() {
+    clearInterval(state.timerInterval);
+    callSeconds = 0;
+    state.timerInterval = setInterval(() => {
+      callSeconds++;
+      const m = Math.floor(callSeconds / 60);
+      const s = callSeconds % 60;
+      document.getElementById('callTimer').textContent = m + ':' + String(s).padStart(2,'0');
+      if (callSeconds >= 300) {
+        clearInterval(state.timerInterval);
+        document.getElementById('callingStatus').textContent = '● Free time ended — create account to continue';
+        document.getElementById('callingStatus').style.color = 'var(--gold)';
+      }
+    }, 1000);
+  }
+
+  // ── MODAL CONTROLS ──
+  function openWizard() {
+    // Reset state
+    state.currentStep = 1;
+    state.companionType = null;
+    state.personalities = [];
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.persona-option').forEach(c => c.classList.remove('selected'));
+    document.getElementById('companionName').value = '';
+    document.getElementById('phoneNumber').value = '';
+    document.getElementById('describeText').value = '';
+    document.getElementById('aiSuggestion').classList.remove('show');
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('next1').disabled = true;
+    document.getElementById('next2').disabled = true;
+    document.getElementById('next4').disabled = true;
+    clearInterval(state.timerInterval);
+    renderDots(1);
+    document.getElementById('wizardModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWizard() {
+    clearInterval(state.timerInterval);
+    document.getElementById('wizardModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function openAuth() {
+    document.getElementById('authModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAuth() {
+    document.getElementById('authModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Click outside to close
+  document.getElementById('wizardModal').addEventListener('click', function(e) {
+    if (e.target === this) closeWizard();
+  });
+  document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAuth();
+  });
+
+  // ── AUTH TABS ──
+  function switchAuth(mode, el) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('authSignin').style.display = mode === 'signin' ? 'block' : 'none';
+    document.getElementById('authSignup').style.display = mode === 'signup' ? 'block' : 'none';
+  }
+
+  // ── FAQ ──
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── MOBILE MENU ──
+  function toggleMobileMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // ── NAV SCROLL EFFECT ──
+  window.addEventListener('scroll', () => {
+    document.querySelector('nav').style.background =
+      window.scrollY > 60 ? 'rgba(6,4,14,0.95)' : 'rgba(6,4,14,0.75)';
+  });
+
+  // ── ANIMATE ON SCROLL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.step-card, .persona-card, .price-card, .testi-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease, border-color 0.3s, background 0.3s, box-shadow 0.3s';
+    observer.observe(el);
+  });
+
+  // Init dots
+  renderDots(1);
+</script>
+</body>
+</html>
