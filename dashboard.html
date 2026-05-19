@@ -3,790 +3,763 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CallMyBae — My Companion</title>
+<title>CallMyBae — My Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#06040e;--bg2:#0e0a1a;--bg3:#160f28;--rose:#ff6b8a;--rose2:#ff4d73;--gold:#f5c85a;--cream:#f0e4d0;--cream2:#c8b8a0;--muted:#7a6e8a;--border:rgba(255,107,138,0.15);--card:rgba(255,255,255,0.04);--r:14px;--r2:20px;--trans:all 0.3s ease}
+:root{--bg:#06040e;--bg2:#0e0a1a;--rose:#ff6b8a;--rose2:#ff4d73;--gold:#f5c85a;--cream:#f0e4d0;--cream2:#c8b8a0;--muted:#7a6e8a;--border:rgba(255,107,138,0.15);--card:rgba(255,255,255,0.04);--r:12px;--r2:18px;--trans:all 0.28s ease;--sidebar:240px;--topbar:56px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px}
 
-/* Layout */
-.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:1.5rem 1rem;position:fixed;width:240px;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
-.main{margin-left:240px;padding:2rem;max-width:900px}
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;overflow:hidden}
 
-/* Sidebar */
-.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;background:linear-gradient(135deg,var(--rose),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2rem;padding:0 0.5rem}
-.nav-item{display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.8rem;border-radius:var(--r);cursor:pointer;transition:var(--trans);color:var(--cream2);font-size:0.9rem;margin-bottom:0.2rem;border:none;background:none;width:100%;text-align:left}
-.nav-item:hover,.nav-item.active{background:rgba(255,107,138,0.1);color:var(--cream)}
-.nav-item.active{border-left:2px solid var(--rose)}
-.nav-icon{font-size:1.1rem;width:20px;text-align:center}
-.sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+/* ── SIDEBAR (desktop) ── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  height:100vh;position:relative;z-index:10;
+}
+.sidebar-logo{padding:1.4rem 1.2rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;background:linear-gradient(135deg,var(--rose),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-nav{flex:1;padding:0 0.6rem}
+.nav-btn{display:flex;align-items:center;gap:0.7rem;width:100%;padding:0.65rem 0.8rem;border-radius:var(--r);border:none;background:none;color:var(--cream2);font-size:0.88rem;cursor:pointer;transition:var(--trans);text-align:left;margin-bottom:2px;white-space:nowrap}
+.nav-btn:hover{background:rgba(255,107,138,0.08);color:var(--cream)}
+.nav-btn.active{background:rgba(255,107,138,0.13);color:var(--cream);border-left:2px solid var(--rose)}
+.nav-icon{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.sidebar-foot{padding:0.8rem;border-top:1px solid var(--border);margin-top:auto}
+.sidebar-user{font-size:0.75rem;color:var(--muted);padding:0.4rem 0.6rem;margin-bottom:0.4rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* Cards */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.2rem;transition:var(--trans)}
-.card:hover{border-color:rgba(255,107,138,0.3)}
-.card-title{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:1rem}
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* Credits bar */
-.credits-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem}
-.credit-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center}
-.credit-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--rose)}
-.credit-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:0.2rem}
+/* ── TOP BAR (mobile) ── */
+.topbar{
+  display:none;height:var(--topbar);
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  align-items:center;justify-content:space-between;
+  padding:0 1rem;flex-shrink:0;position:relative;z-index:10;
+}
+.topbar-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;background:linear-gradient(135deg,var(--rose),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-title{position:absolute;left:50%;transform:translateX(-50%);font-size:0.9rem;font-weight:600;color:var(--cream2)}
 
-/* Progress bar */
-.progress-wrap{background:rgba(255,255,255,0.06);border-radius:100px;height:6px;margin:0.8rem 0}
-.progress-fill{height:6px;border-radius:100px;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width 0.6s ease}
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:1.8rem 2rem 2rem}
 
-/* Inputs */
-.form-group{margin-bottom:1.2rem}
-.form-label{display:block;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:0.4rem}
-.form-input,.form-select,.form-textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r);color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;padding:0.75rem 1rem;outline:none;transition:var(--trans)}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--rose)}
-.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
-.form-textarea{min-height:90px;resize:vertical;line-height:1.6}
-.form-select option{background:var(--bg2)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav{
+  display:none;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+  flex-shrink:0;
+}
+.bottom-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0.3rem 0.6rem;border:none;background:none;color:var(--muted);font-size:0.65rem;cursor:pointer;transition:var(--trans);min-width:44px}
+.bnav-btn.active{color:var(--rose)}
+.bnav-icon{font-size:1.3rem;line-height:1}
 
-/* Tags */
-.tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
-.tag{padding:0.4rem 0.9rem;border-radius:100px;font-size:0.78rem;cursor:pointer;transition:var(--trans);border:1px solid rgba(255,255,255,0.12);color:var(--cream2);background:rgba(255,255,255,0.04)}
-.tag:hover,.tag.selected{background:rgba(255,107,138,0.15);border-color:var(--rose);color:var(--cream)}
-
-/* Buttons */
-.btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;border:none;padding:0.8rem 1.8rem;border-radius:100px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:var(--trans);box-shadow:0 4px 20px rgba(255,107,138,0.3)}
-.btn-primary:hover{box-shadow:0 8px 28px rgba(255,107,138,0.5);transform:translateY(-1px)}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--cream2);padding:0.75rem 1.5rem;border-radius:100px;font-size:0.88rem;cursor:pointer;transition:var(--trans)}
-.btn-ghost:hover{border-color:var(--rose);color:var(--cream)}
-.btn-sm{padding:0.5rem 1rem;font-size:0.82rem}
-
-/* Topup amount buttons */
-.amount-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.7rem;margin:1rem 0}
-.amount-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r);padding:0.8rem;text-align:center;cursor:pointer;transition:var(--trans);font-size:0.9rem}
-.amount-btn:hover,.amount-btn.selected{background:rgba(255,107,138,0.12);border-color:var(--rose);color:var(--rose)}
-.amount-label{font-size:0.7rem;color:var(--muted);margin-top:0.2rem}
-
-/* Memory items */
-.memory-item{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-.memory-item:last-child{border-bottom:none}
-.memory-dot{width:6px;height:6px;border-radius:50%;background:var(--rose);flex-shrink:0}
-
-/* Call history */
-.call-row{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-.call-row:last-child{border-bottom:none}
-.call-duration{font-weight:600;font-size:0.9rem}
-.call-date{font-size:0.78rem;color:var(--muted)}
-.call-badge{font-size:0.7rem;padding:0.25rem 0.6rem;border-radius:100px;background:rgba(255,107,138,0.12);color:var(--rose)}
-
-/* Schedule item */
-.schedule-item{display:flex;align-items:center;justify-content:space-between;padding:1rem;background:rgba(255,255,255,0.03);border-radius:var(--r);margin-bottom:0.7rem;border:1px solid rgba(255,255,255,0.06)}
-
-/* Companion avatar */
-.companion-avatar{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--rose),#c0457d)}
-
-/* Section title */
-.section-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;margin-bottom:0.3rem}
-.section-sub{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem}
-
-/* Toast */
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:0.8rem 1.6rem;font-size:0.88rem;color:var(--cream);box-shadow:0 20px 50px rgba(0,0,0,0.4);z-index:300;transition:transform 0.4s ease;white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* Page visibility */
+/* ── PAGES ── */
 .page{display:none}.page.active{display:block}
 
-/* Toggle */
-.toggle{display:flex;align-items:center;gap:0.8rem;cursor:pointer}
-.toggle-track{width:44px;height:24px;background:rgba(255,255,255,0.1);border-radius:100px;position:relative;transition:var(--trans)}
-.toggle-track.on{background:var(--rose)}
-.toggle-thumb{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:var(--trans)}
-.toggle-track.on .toggle-thumb{left:23px}
+/* ── SECTION HEADER ── */
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;margin-bottom:0.2rem}
+.section-sub{color:var(--muted);font-size:0.83rem;margin-bottom:1.4rem;line-height:1.5}
 
-/* Pill tabs */
-.pill-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:100px;padding:4px;margin-bottom:1.5rem;width:fit-content}
-.pill-tab{padding:0.5rem 1.2rem;border-radius:100px;font-size:0.85rem;cursor:pointer;transition:var(--trans);color:var(--muted)}
-.pill-tab.active{background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;font-weight:600}
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem;margin-bottom:1rem}
+.card-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:0.9rem}
 
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--rose);line-height:1}
+.stat-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-top:0.3rem}
+
+/* ── PROGRESS ── */
+.progress-wrap{background:rgba(255,255,255,0.06);border-radius:100px;height:5px;margin:0.7rem 0}
+.progress-fill{height:5px;border-radius:100px;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width 0.6s ease}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:1rem}
+.form-label{display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:0.35rem}
+.form-input,.form-select,.form-textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;padding:0.7rem 0.9rem;outline:none;transition:var(--trans)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--rose)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-textarea{min-height:85px;resize:vertical;line-height:1.6}
+.form-select option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+
+/* ── TAGS ── */
+.tags{display:flex;flex-wrap:wrap;gap:0.45rem;margin-top:0.4rem}
+.tag{padding:0.35rem 0.85rem;border-radius:100px;font-size:0.76rem;cursor:pointer;transition:var(--trans);border:1px solid rgba(255,255,255,0.1);color:var(--cream2);background:rgba(255,255,255,0.03)}
+.tag:hover,.tag.selected{background:rgba(255,107,138,0.14);border-color:var(--rose);color:var(--cream)}
+
+/* ── BUTTONS ── */
+.btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;border:none;padding:0.75rem 1.6rem;border-radius:100px;font-size:0.88rem;font-weight:600;cursor:pointer;transition:var(--trans);box-shadow:0 4px 18px rgba(255,107,138,0.3);display:inline-flex;align-items:center;gap:0.4rem}
+.btn-primary:hover{box-shadow:0 8px 26px rgba(255,107,138,0.5);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.13);color:var(--cream2);padding:0.7rem 1.4rem;border-radius:100px;font-size:0.85rem;cursor:pointer;transition:var(--trans);display:inline-flex;align-items:center;gap:0.4rem}
+.btn-ghost:hover{border-color:var(--rose);color:var(--cream)}
+.btn-sm{padding:0.45rem 0.9rem;font-size:0.8rem}
+.btn-row{display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center}
+
+/* ── AMOUNT GRID ── */
+.amount-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin:0.8rem 0}
+.amount-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r);padding:0.75rem 0.5rem;text-align:center;cursor:pointer;transition:var(--trans)}
+.amount-btn:hover,.amount-btn.selected{background:rgba(255,107,138,0.12);border-color:var(--rose);color:var(--rose)}
+.amount-main{font-weight:600;font-size:0.9rem}
+.amount-sub{font-size:0.68rem;color:var(--muted);margin-top:0.2rem}
+
+/* ── ROWS ── */
+.list-row{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.list-row:last-child{border-bottom:none}
+.list-main{font-size:0.88rem;font-weight:500}
+.list-sub{font-size:0.75rem;color:var(--muted);margin-top:0.15rem}
+
+/* ── MEMORY ── */
+.mem-item{display:flex;align-items:flex-start;gap:0.7rem;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.mem-item:last-child{border-bottom:none}
+.mem-dot{width:5px;height:5px;border-radius:50%;background:var(--rose);flex-shrink:0;margin-top:6px}
+
+/* ── COMPANION AVATAR ── */
+.c-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;background:linear-gradient(135deg,var(--rose),#c0457d)}
+
+/* ── SCHEDULE ITEM ── */
+.sched-item{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r);padding:0.9rem 1rem;margin-bottom:0.6rem}
+
+/* ── BADGE ── */
+.badge{font-size:0.68rem;padding:0.2rem 0.55rem;border-radius:100px;background:rgba(255,107,138,0.12);color:var(--rose)}
+.badge-green{background:rgba(74,222,128,0.12);color:#4ade80}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:0.75rem 1.4rem;font-size:0.85rem;color:var(--cream);box-shadow:0 16px 40px rgba(0,0,0,0.5);z-index:999;transition:transform 0.35s ease;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── RESPONSIVE ── */
 @media(max-width:768px){
-  .app{grid-template-columns:1fr}
   .sidebar{display:none}
-  .main{margin-left:0;padding:1.2rem}
+  .topbar{display:flex}
+  .bottom-nav{display:block}
+  .content{padding:1rem 1rem 1.2rem}
+  .stat-grid{grid-template-columns:1fr 1fr}
   .form-row{grid-template-columns:1fr}
   .amount-grid{grid-template-columns:repeat(2,1fr)}
-  .credits-bar{grid-template-columns:1fr 1fr}
+  .section-title{font-size:1.3rem}
+}
+@media(min-width:769px){
+  .topbar{display:none}
+  .bottom-nav{display:none}
 }
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
-<div class="app">
-<!-- SIDEBAR -->
+<div class="layout">
+
+<!-- SIDEBAR (desktop) -->
 <aside class="sidebar">
-  <div class="logo">CallMyBae</div>
-  <nav>
-    <button class="nav-item active" onclick="showPage('home',this)"><span class="nav-icon">🏠</span> Home</button>
-    <button class="nav-item" onclick="showPage('companion',this)"><span class="nav-icon">💫</span> My Companion</button>
-    <button class="nav-item" onclick="showPage('memory',this)"><span class="nav-icon">🧠</span> Memory</button>
-    <button class="nav-item" onclick="showPage('schedule',this)"><span class="nav-icon">📅</span> Scheduled Calls</button>
-    <button class="nav-item" onclick="showPage('credits',this)"><span class="nav-icon">💳</span> Credits</button>
-    <button class="nav-item" onclick="showPage('profile',this)"><span class="nav-icon">👤</span> Profile</button>
-    <button class="nav-item" onclick="showPage('history',this)"><span class="nav-icon">📞</span> Call History</button>
+  <div class="sidebar-logo">CallMyBae</div>
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Home</button>
+    <button class="nav-btn" data-page="companion"><span class="nav-icon">💫</span> My Companion</button>
+    <button class="nav-btn" data-page="memory"><span class="nav-icon">🧠</span> Memory</button>
+    <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Scheduled Calls</button>
+    <button class="nav-btn" data-page="credits"><span class="nav-icon">💳</span> Credits</button>
+    <button class="nav-btn" data-page="profile"><span class="nav-icon">👤</span> Profile</button>
+    <button class="nav-btn" data-page="history"><span class="nav-icon">📞</span> History</button>
   </nav>
-  <div class="sidebar-bottom">
-    <div style="font-size:0.78rem;color:var(--muted);padding:0 0.5rem;margin-bottom:0.8rem" id="sidebarUser"></div>
-    <button class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span> Sign Out</button>
+  <div class="sidebar-foot">
+    <div class="sidebar-user" id="sidebarUser"></div>
+    <button class="nav-btn" onclick="logout()"><span class="nav-icon">🚪</span> Sign Out</button>
   </div>
 </aside>
 
-<!-- MAIN CONTENT -->
-<main class="main">
+<!-- MAIN -->
+<div class="main">
 
-<!-- HOME PAGE -->
-<div class="page active" id="page-home">
-  <div class="section-title">Good <span id="timeGreeting">day</span>, <span id="userName">friend</span> ✦</div>
-  <div class="section-sub" id="homeSubtitle">Your companion is waiting to hear from you</div>
-
-  <!-- Credits summary -->
-  <div class="credits-bar">
-    <div class="credit-stat">
-      <div class="credit-num" id="homeBalance">—</div>
-      <div class="credit-label">Credits</div>
-    </div>
-    <div class="credit-stat">
-      <div class="credit-num" id="homeMins">—</div>
-      <div class="credit-label">Minutes Left</div>
-    </div>
-    <div class="credit-stat">
-      <div class="credit-num" id="homeCalls">—</div>
-      <div class="credit-label">Total Calls</div>
-    </div>
+  <!-- TOP BAR (mobile only) -->
+  <div class="topbar">
+    <div class="topbar-logo">CallMyBae</div>
+    <span class="topbar-title" id="topbarTitle">Home</span>
+    <button class="btn-ghost btn-sm" onclick="logout()" style="padding:0.35rem 0.7rem;font-size:0.75rem">Out</button>
   </div>
 
-  <!-- Quick call -->
-  <div class="card">
-    <div class="card-title">Quick Call</div>
-    <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
-      <div class="companion-avatar" id="homeAvatar">✦</div>
-      <div style="flex:1">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600" id="homeCompanionName">Luna</div>
-        <div style="font-size:0.82rem;color:var(--muted);margin:0.3rem 0 1rem">Ready to talk</div>
-        <button class="btn-primary" onclick="quickCall()">📞 Call Me Now</button>
+  <!-- CONTENT -->
+  <div class="content" id="contentArea">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="section-title">Hey <span id="userName">there</span> ✦</div>
+      <div class="section-sub" id="homeSubtitle">Your companion is waiting</div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="homeBalance">—</div>
+          <div class="stat-label">Credits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="homeMins">—</div>
+          <div class="stat-label">Mins Left</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="homeCalls">—</div>
+          <div class="stat-label">Calls Made</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Quick Call</div>
+        <div style="display:flex;align-items:center;gap:1.2rem">
+          <div class="c-avatar" id="homeAvatar">✦</div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600" id="homeCompanionName">Luna</div>
+            <div style="font-size:0.8rem;color:var(--muted);margin:0.2rem 0 0.9rem">Ready to talk with you</div>
+            <button class="btn-primary" onclick="quickCall()">📞 Call Me Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="lowCreditsCard" style="display:none;border-color:rgba(245,200,90,0.35);background:rgba(245,200,90,0.04)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:600;color:var(--gold);font-size:0.9rem">⚠ Running low on credits</div>
+            <div style="font-size:0.8rem;color:var(--cream2);margin-top:0.2rem">Top up to keep the conversation going</div>
+          </div>
+          <button class="btn-primary btn-sm" onclick="navTo('credits')">Top Up ✦</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Low credits warning -->
-  <div class="card" id="lowCreditsWarning" style="display:none;border-color:rgba(245,200,90,0.4);background:rgba(245,200,90,0.05)">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
-      <div>
-        <div style="font-weight:600;color:var(--gold)">⚠ Running low on credits</div>
-        <div style="font-size:0.82rem;color:var(--cream2);margin-top:0.3rem">Top up to keep talking</div>
+    <!-- COMPANION -->
+    <div class="page" id="page-companion">
+      <div class="section-title">My Companion</div>
+      <div class="section-sub">Customise who calls you and how they feel</div>
+
+      <div class="card">
+        <div class="card-title">Identity</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Their name</label>
+            <input class="form-input" id="cName" placeholder="Luna, Aryan, Alex..." maxlength="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select class="form-select" id="cType">
+              <option value="her">She / Her</option>
+              <option value="him">He / Him</option>
+              <option value="them">They / Them</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Language</label>
+          <select class="form-select" id="cLang">
+            <option value="hi">🇮🇳 Hindi / Hinglish</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="es">🇪🇸 Spanish</option>
+            <option value="fr">🇫🇷 French</option>
+            <option value="de">🇩🇪 German</option>
+            <option value="ta">🇮🇳 Tamil</option>
+            <option value="te">🇮🇳 Telugu</option>
+          </select>
+        </div>
       </div>
-      <button class="btn-primary btn-sm" onclick="showPage('credits',document.querySelector('[onclick*=credits]'))">Top Up</button>
-    </div>
-  </div>
-</div>
 
-<!-- COMPANION PAGE -->
-<div class="page" id="page-companion">
-  <div class="section-title">My Companion</div>
-  <div class="section-sub">Customize who calls you and how they feel</div>
-
-  <div class="card">
-    <div class="card-title">Companion Identity</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Their name</label>
-        <input class="form-input" id="cName" placeholder="Luna, Aryan, Alex..." maxlength="20">
+      <div class="card">
+        <div class="card-title">Personality (pick up to 3)</div>
+        <div class="tags" id="personalityTags">
+          <span class="tag" data-val="warm">🌸 Warm & Caring</span>
+          <span class="tag" data-val="playful">⚡ Playful & Witty</span>
+          <span class="tag" data-val="intellectual">📚 Deep Thinker</span>
+          <span class="tag" data-val="flirty">🔥 Flirty & Bold</span>
+          <span class="tag" data-val="motivating">🎯 Motivating</span>
+          <span class="tag" data-val="calm">🌙 Calm & Soothing</span>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Gender</label>
-        <select class="form-select" id="cType">
-          <option value="her">She / Her</option>
-          <option value="him">He / Him</option>
-          <option value="them">They / Them</option>
-        </select>
+
+      <div class="card">
+        <div class="card-title">Describe them in your words</div>
+        <textarea class="form-textarea" id="cDesc" placeholder="e.g. Someone who motivates me, loves music, checks in on me daily..."></textarea>
       </div>
+
+      <button class="btn-primary" onclick="saveCompanion()">Save ✦</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Language</label>
-      <select class="form-select" id="cLang">
-        <option value="hi">🇮🇳 Hindi / Hinglish</option>
-        <option value="en">🇬🇧 English</option>
-        <option value="es">🇪🇸 Spanish</option>
-        <option value="fr">🇫🇷 French</option>
-        <option value="de">🇩🇪 German</option>
-        <option value="ta">🇮🇳 Tamil</option>
-        <option value="te">🇮🇳 Telugu</option>
-      </select>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">Personality Vibes (pick up to 3)</div>
-    <div class="tags" id="personalityTags">
-      <span class="tag" data-val="warm" onclick="toggleTag(this)">🌸 Warm & Caring</span>
-      <span class="tag" data-val="playful" onclick="toggleTag(this)">⚡ Playful & Witty</span>
-      <span class="tag" data-val="intellectual" onclick="toggleTag(this)">📚 Deep Thinker</span>
-      <span class="tag" data-val="flirty" onclick="toggleTag(this)">🔥 Flirty & Bold</span>
-      <span class="tag" data-val="motivating" onclick="toggleTag(this)">🎯 Motivating</span>
-      <span class="tag" data-val="calm" onclick="toggleTag(this)">🌙 Calm & Soothing</span>
-    </div>
-  </div>
+    <!-- MEMORY -->
+    <div class="page" id="page-memory">
+      <div class="section-title">Memory Bank</div>
+      <div class="section-sub">What your companion knows about you — grows with every call</div>
 
-  <div class="card">
-    <div class="card-title">Describe them in your words</div>
-    <textarea class="form-textarea" id="cDesc" placeholder="e.g. Someone who motivates me, loves music, speaks softly, has a great sense of humor, and always checks in on me..."></textarea>
-  </div>
-
-  <button class="btn-primary" onclick="saveCompanion()">Save Companion ✦</button>
-</div>
-
-<!-- MEMORY PAGE -->
-<div class="page" id="page-memory">
-  <div class="section-title">Memory Bank</div>
-  <div class="section-sub">What your companion knows about you from your conversations</div>
-
-  <div class="card" id="memoryCard">
-    <div class="card-title">What they remember</div>
-    <div id="memoryList"><div style="color:var(--muted);font-size:0.88rem">Loading memories...</div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Memory grows with every call</div>
-    <div style="font-size:0.85rem;color:var(--cream2);line-height:1.7">
-      After each conversation, your companion automatically extracts important facts — your family, work, goals, struggles — and remembers them forever. The more you talk, the more personal every conversation gets.
-    </div>
-    <div style="display:flex;gap:1rem;margin-top:1.2rem;flex-wrap:wrap">
-      <div style="text-align:center;flex:1;min-width:80px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--rose)" id="factCount">0</div>
-        <div style="font-size:0.72rem;color:var(--muted)">FACTS REMEMBERED</div>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr;margin-bottom:1rem">
+        <div class="stat-card">
+          <div class="stat-num" id="factCount">0</div>
+          <div class="stat-label">Facts Remembered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="totalMins" style="color:var(--gold)">0</div>
+          <div class="stat-label">Minutes Talked</div>
+        </div>
       </div>
-      <div style="text-align:center;flex:1;min-width:80px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold)" id="totalMins">0</div>
-        <div style="font-size:0.72rem;color:var(--muted)">MINUTES TALKED</div>
+
+      <div class="card">
+        <div class="card-title">What they remember about you</div>
+        <div id="memoryList"><div style="color:var(--muted);font-size:0.85rem">Loading...</div></div>
       </div>
+
+      <div class="card" style="background:rgba(245,200,90,0.04);border-color:rgba(245,200,90,0.2)">
+        <div style="font-size:0.83rem;color:var(--cream2);line-height:1.7">
+          💡 After each call, your companion automatically extracts important things you share — your family, work, goals, feelings — and uses them naturally in future conversations.
+        </div>
+      </div>
+
+      <button class="btn-ghost btn-sm" onclick="clearMemory()" style="color:var(--muted);font-size:0.8rem">🗑 Clear all memory</button>
     </div>
-  </div>
 
-  <button class="btn-ghost" onclick="clearMemory()" style="font-size:0.82rem;color:var(--muted)">🗑 Clear all memory</button>
-</div>
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule">
+      <div class="section-title">Scheduled Calls</div>
+      <div class="section-sub">Your companion calls you automatically at set times</div>
 
-<!-- SCHEDULED CALLS PAGE -->
-<div class="page" id="page-schedule">
-  <div class="section-title">Scheduled Calls</div>
-  <div class="section-sub">Your companion calls you automatically — morning check-ins, evening chats, whenever you need</div>
+      <div id="scheduleList" style="margin-bottom:1rem"></div>
 
-  <div id="scheduleList"></div>
-
-  <div class="card">
-    <div class="card-title">Add a Scheduled Call</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Time</label>
-        <input class="form-input" type="time" id="sTime" value="08:00">
-      </div>
-      <div class="form-group">
-        <label class="form-label">What to talk about</label>
-        <input class="form-input" id="sTopic" placeholder="Morning motivation, check-in, anything...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Days</label>
-      <div class="tags" id="dayTags">
-        <span class="tag selected" data-val="mon" onclick="toggleDayTag(this)">Mon</span>
-        <span class="tag selected" data-val="tue" onclick="toggleDayTag(this)">Tue</span>
-        <span class="tag selected" data-val="wed" onclick="toggleDayTag(this)">Wed</span>
-        <span class="tag selected" data-val="thu" onclick="toggleDayTag(this)">Thu</span>
-        <span class="tag selected" data-val="fri" onclick="toggleDayTag(this)">Fri</span>
-        <span class="tag" data-val="sat" onclick="toggleDayTag(this)">Sat</span>
-        <span class="tag" data-val="sun" onclick="toggleDayTag(this)">Sun</span>
+      <div class="card">
+        <div class="card-title">Add New Schedule</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input class="form-input" type="time" id="sTime" value="08:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Topic</label>
+            <input class="form-input" id="sTopic" placeholder="Morning motivation, check-in...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Days</label>
+          <div class="tags" id="dayTags">
+            <span class="tag selected" data-val="mon">Mon</span>
+            <span class="tag selected" data-val="tue">Tue</span>
+            <span class="tag selected" data-val="wed">Wed</span>
+            <span class="tag selected" data-val="thu">Thu</span>
+            <span class="tag selected" data-val="fri">Fri</span>
+            <span class="tag" data-val="sat">Sat</span>
+            <span class="tag" data-val="sun">Sun</span>
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="addSchedule()" style="margin-top:0.3rem">Add Schedule</button>
       </div>
     </div>
-    <button class="btn-primary btn-sm" onclick="addSchedule()" style="margin-top:0.5rem">Add Schedule</button>
-  </div>
-</div>
 
-<!-- CREDITS PAGE -->
-<div class="page" id="page-credits">
-  <div class="section-title">Credits</div>
-  <div class="section-sub">₹1 = 1 credit · 2 credits/minute · Credits never expire</div>
+    <!-- CREDITS -->
+    <div class="page" id="page-credits">
+      <div class="section-title">Credits</div>
+      <div class="section-sub">₹1 = 1 credit · 2 credits per minute · Never expire</div>
 
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-      <div>
-        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Current Balance</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:600;color:var(--rose)" id="creditBalance">—</div>
-        <div style="font-size:0.85rem;color:var(--cream2)"><span id="creditMins">—</span> minutes of talk time remaining</div>
+      <div class="card">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:0.8rem">
+          <div>
+            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Balance</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;color:var(--rose);line-height:1" id="creditBalance">—</div>
+            <div style="font-size:0.82rem;color:var(--cream2);margin-top:0.3rem"><span id="creditMins">—</span> minutes remaining</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:0.72rem;color:var(--muted)">Rate</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--gold)">₹2/min</div>
+          </div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="creditBar" style="width:0%"></div></div>
       </div>
-      <div style="text-align:right">
-        <div style="font-size:0.78rem;color:var(--muted)">Rate</div>
-        <div style="font-size:1.2rem;font-weight:600;color:var(--gold)">₹2 / min</div>
-      </div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-fill" id="creditProgressBar" style="width:0%"></div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">Top Up Credits</div>
-    <div class="amount-grid">
-      <div class="amount-btn" onclick="selectAmount(this,100)">
-        <div style="font-weight:600">₹100</div>
-        <div class="amount-label">50 mins</div>
+      <div class="card">
+        <div class="card-title">Top Up</div>
+        <div class="amount-grid">
+          <div class="amount-btn" onclick="selectAmt(this,100)"><div class="amount-main">₹100</div><div class="amount-sub">50 mins</div></div>
+          <div class="amount-btn" onclick="selectAmt(this,200)"><div class="amount-main">₹200</div><div class="amount-sub">100 mins</div></div>
+          <div class="amount-btn" onclick="selectAmt(this,500)"><div class="amount-main">₹500</div><div class="amount-sub">250 mins</div></div>
+          <div class="amount-btn" onclick="selectAmt(this,1000)"><div class="amount-main">₹1000</div><div class="amount-sub">500 mins</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Custom amount (min ₹50)</label>
+          <input class="form-input" type="number" id="customAmt" placeholder="₹" min="50" max="10000">
+        </div>
+        <button class="btn-primary" onclick="doTopUp()">Pay with Razorpay ✦</button>
       </div>
-      <div class="amount-btn" onclick="selectAmount(this,200)">
-        <div style="font-weight:600">₹200</div>
-        <div class="amount-label">100 mins</div>
-      </div>
-      <div class="amount-btn" onclick="selectAmount(this,500)">
-        <div style="font-weight:600">₹500</div>
-        <div class="amount-label">250 mins</div>
-      </div>
-      <div class="amount-btn" onclick="selectAmount(this,1000)">
-        <div style="font-weight:600">₹1000</div>
-        <div class="amount-label">500 mins</div>
+
+      <div class="card">
+        <div class="card-title">Transaction History</div>
+        <div id="txnList"><div style="color:var(--muted);font-size:0.83rem">Loading...</div></div>
       </div>
     </div>
-    <div class="form-group" style="margin-top:0.5rem">
-      <label class="form-label">Or enter custom amount (min ₹50)</label>
-      <input class="form-input" type="number" id="customAmount" placeholder="Enter amount in ₹" min="50" max="10000">
-    </div>
-    <button class="btn-primary" onclick="initiateTopUp()" style="margin-top:0.5rem">Pay with Razorpay ✦</button>
-  </div>
 
-  <div class="card">
-    <div class="card-title">Transaction History</div>
-    <div id="txnList"><div style="color:var(--muted);font-size:0.85rem">Loading...</div></div>
-  </div>
-</div>
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="section-title">My Profile</div>
+      <div class="section-sub">The more you share, the more personal every call becomes</div>
 
-<!-- PROFILE PAGE -->
-<div class="page" id="page-profile">
-  <div class="section-title">My Profile</div>
-  <div class="section-sub">The more you share, the more personal your companion becomes</div>
-
-  <div class="card">
-    <div class="card-title">About You</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">First name</label>
-        <input class="form-input" id="pName" placeholder="What should we call you?">
+      <div class="card">
+        <div class="card-title">About You</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input class="form-input" id="pName" placeholder="What should we call you?">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input class="form-input" type="number" id="pAge" placeholder="Age" min="18" max="100">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" id="pCity" placeholder="Mumbai, Delhi...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Occupation</label>
+            <input class="form-input" id="pOccupation" placeholder="What do you do?">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tell your companion about yourself</label>
+          <textarea class="form-textarea" id="pAbout" placeholder="Share anything — your life, what you love, what's on your mind..."></textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Age</label>
-        <input class="form-input" type="number" id="pAge" placeholder="Age" min="18" max="100">
+
+      <div class="card">
+        <div class="card-title">Your Interests</div>
+        <div class="tags" id="interestTags">
+          <span class="tag" data-val="cricket">🏏 Cricket</span>
+          <span class="tag" data-val="music">🎵 Music</span>
+          <span class="tag" data-val="movies">🎬 Movies</span>
+          <span class="tag" data-val="startups">🚀 Startups</span>
+          <span class="tag" data-val="fitness">💪 Fitness</span>
+          <span class="tag" data-val="travel">✈ Travel</span>
+          <span class="tag" data-val="cooking">🍳 Cooking</span>
+          <span class="tag" data-val="gaming">🎮 Gaming</span>
+          <span class="tag" data-val="books">📖 Books</span>
+          <span class="tag" data-val="spirituality">🙏 Spirituality</span>
+        </div>
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">City</label>
-        <input class="form-input" id="pCity" placeholder="Mumbai, Delhi, Bangalore...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Occupation</label>
-        <input class="form-input" id="pOccupation" placeholder="What do you do?">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Tell your companion about yourself</label>
-      <textarea class="form-textarea" id="pAbout" placeholder="Share anything — your life, what you love, what's on your mind. The more you share, the better they know you..."></textarea>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">Your Interests (your companion will bring these up)</div>
-    <div class="tags" id="interestTags">
-      <span class="tag" data-val="cricket" onclick="toggleInterest(this)">🏏 Cricket</span>
-      <span class="tag" data-val="music" onclick="toggleInterest(this)">🎵 Music</span>
-      <span class="tag" data-val="movies" onclick="toggleInterest(this)">🎬 Movies</span>
-      <span class="tag" data-val="startups" onclick="toggleInterest(this)">🚀 Startups</span>
-      <span class="tag" data-val="fitness" onclick="toggleInterest(this)">💪 Fitness</span>
-      <span class="tag" data-val="travel" onclick="toggleInterest(this)">✈ Travel</span>
-      <span class="tag" data-val="cooking" onclick="toggleInterest(this)">🍳 Cooking</span>
-      <span class="tag" data-val="gaming" onclick="toggleInterest(this)">🎮 Gaming</span>
-      <span class="tag" data-val="books" onclick="toggleInterest(this)">📖 Books</span>
-      <span class="tag" data-val="spirituality" onclick="toggleInterest(this)">🙏 Spirituality</span>
+      <button class="btn-primary" onclick="saveProfile()">Save Profile ✦</button>
     </div>
-  </div>
 
-  <button class="btn-primary" onclick="saveProfile()">Save Profile ✦</button>
-</div>
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="section-title">Call History</div>
+      <div class="section-sub">Every conversation, saved forever</div>
+      <div class="card"><div id="callHistoryList"><div style="color:var(--muted);font-size:0.83rem">Loading...</div></div></div>
+    </div>
 
-<!-- CALL HISTORY PAGE -->
-<div class="page" id="page-history">
-  <div class="section-title">Call History</div>
-  <div class="section-sub">Every conversation, recorded and remembered</div>
-  <div class="card">
-    <div id="callHistoryList"><div style="color:var(--muted);font-size:0.85rem">Loading...</div></div>
-  </div>
-</div>
+  </div><!-- /content -->
 
-</main>
-</div>
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="bnav-btn active" data-page="home"><div class="bnav-icon">🏠</div>Home</button>
+      <button class="bnav-btn" data-page="companion"><div class="bnav-icon">💫</div>Companion</button>
+      <button class="bnav-btn" data-page="memory"><div class="bnav-icon">🧠</div>Memory</button>
+      <button class="bnav-btn" data-page="credits"><div class="bnav-icon">💳</div>Credits</button>
+      <button class="bnav-btn" data-page="profile"><div class="bnav-icon">👤</div>Profile</button>
+      <button class="bnav-btn" data-page="schedule"><div class="bnav-icon">📅</div>Schedule</button>
+      <button class="bnav-btn" data-page="history"><div class="bnav-icon">📞</div>History</button>
+    </div>
+  </nav>
+
+</div><!-- /main -->
+</div><!-- /layout -->
 
 <script>
 const API = 'https://callmybae-backend.onrender.com';
-let token = localStorage.getItem('cmb_token');
-let userData = JSON.parse(localStorage.getItem('cmb_user') || '{}');
-let profileData = {};
-let selectedAmount = 0;
+const token = localStorage.getItem('cmb_token');
+if (!token) window.location.href = '/';
 
-// ── AUTH CHECK ──
-if (!token) {
-  window.location.href = '/';
-}
+const PAGE_TITLES = {home:'Home',companion:'My Companion',memory:'Memory',schedule:'Scheduled Calls',credits:'Credits',profile:'Profile',history:'History'};
+let profileData = {}, selectedAmt = 0;
 
-// ── API HELPER ──
-async function api(method, path, body = null) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API + path, opts);
-  if (res.status === 401) { logout(); return null; }
+// ── API ──
+async function api(method, path, body=null){
+  const opts={method,headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(API+path,opts);
+  if(res.status===401){logout();return null;}
   return res.json();
 }
 
 // ── TOAST ──
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 
 // ── NAVIGATION ──
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  // Load page data
-  if (name === 'memory') loadMemory();
-  if (name === 'credits') loadCredits();
-  if (name === 'history') loadCallHistory();
-  if (name === 'schedule') loadSchedule();
+function navTo(page){
+  // Find and click the correct nav button
+  const btn = document.querySelector(`.nav-btn[data-page="${page}"]`) || document.querySelector(`.bnav-btn[data-page="${page}"]`);
+  if(btn) btn.click();
 }
 
-// ── INIT ──
-async function init() {
-  const hour = new Date().getHours();
-  document.getElementById('timeGreeting').textContent =
-    hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-
-  const data = await api('GET', '/api/profile/');
-  if (!data) return;
-  profileData = data;
-
-  const name = data.profile.first_name || data.user.name || 'friend';
-  document.getElementById('userName').textContent = name;
-  document.getElementById('sidebarUser').textContent = data.user.email || data.user.phone || '';
-  document.getElementById('homeCompanionName').textContent = data.profile.companion_name || 'Luna';
-  document.getElementById('homeCalls').textContent = data.call_count;
-  document.getElementById('totalMins').textContent = Math.round(data.profile.total_call_minutes || 0);
-
-  // Set companion avatar color
-  const colors = { her: '#ff6b8a,#c0457d', him: '#5b8fff,#3a5cc0', them: '#9b59ff,#6a3dc0' };
-  const type = data.profile.companion_type || 'her';
-  document.getElementById('homeAvatar').style.background = `linear-gradient(135deg,${colors[type] || colors.her})`;
-
-  // Load credits
-  const credits = await api('GET', '/api/credits/balance');
-  if (credits) {
-    document.getElementById('homeBalance').textContent = Math.round(credits.balance);
-    document.getElementById('homeMins').textContent = credits.minutes_left;
-    if (credits.low_balance) {
-      document.getElementById('lowCreditsWarning').style.display = 'block';
-    }
-  }
-
-  // Pre-fill profile form
-  fillProfileForm(data.profile);
-  fillCompanionForm(data.profile);
-}
-
-function fillProfileForm(p) {
-  if (p.first_name) document.getElementById('pName').value = p.first_name;
-  if (p.age) document.getElementById('pAge').value = p.age;
-  if (p.city) document.getElementById('pCity').value = p.city;
-  if (p.occupation) document.getElementById('pOccupation').value = p.occupation;
-  if (p.about) document.getElementById('pAbout').value = p.about;
-  // Mark interests
-  (p.interests || []).forEach(i => {
-    document.querySelectorAll('#interestTags .tag').forEach(t => {
-      if (t.dataset.val === i) t.classList.add('selected');
+function initNav(){
+  // Wire up all nav buttons (sidebar + bottom)
+  document.querySelectorAll('.nav-btn[data-page], .bnav-btn[data-page]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const page = btn.dataset.page;
+      // Update active state for sidebar
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector(`.nav-btn[data-page="${page}"]`)?.classList.add('active');
+      // Update active state for bottom nav
+      document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector(`.bnav-btn[data-page="${page}"]`)?.classList.add('active');
+      // Show page
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-'+page)?.classList.add('active');
+      // Update mobile topbar title
+      document.getElementById('topbarTitle').textContent = PAGE_TITLES[page]||page;
+      // Scroll to top
+      document.getElementById('contentArea').scrollTop=0;
+      // Load data for page
+      if(page==='memory') loadMemory();
+      if(page==='credits') loadCredits();
+      if(page==='history') loadHistory();
+      if(page==='schedule') loadSchedule();
     });
   });
 }
 
-function fillCompanionForm(p) {
-  if (p.companion_name) document.getElementById('cName').value = p.companion_name;
-  if (p.companion_type) document.getElementById('cType').value = p.companion_type;
-  if (p.companion_language) document.getElementById('cLang').value = p.companion_language;
-  (p.companion_personalities || []).forEach(v => {
-    document.querySelectorAll('#personalityTags .tag').forEach(t => {
-      if (t.dataset.val === v) t.classList.add('selected');
-    });
+// ── INIT ──
+async function init(){
+  initNav();
+  const h=new Date().getHours();
+  const greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  
+  const data=await api('GET','/api/profile/');
+  if(!data) return;
+  profileData=data;
+
+  const name=(data.profile.first_name||data.user.name||'friend').split(' ')[0];
+  document.getElementById('userName').textContent=name;
+  document.getElementById('sidebarUser').textContent=data.user.email||data.user.phone||'';
+  document.getElementById('homeCompanionName').textContent=data.profile.companion_name||'Luna';
+  document.getElementById('homeCalls').textContent=data.call_count||0;
+  document.getElementById('totalMins').textContent=Math.round(data.profile.total_call_minutes||0);
+
+  const colors={her:'#ff6b8a,#c0457d',him:'#5b8fff,#3a5cc0',them:'#9b59ff,#6a3dc0'};
+  const t=data.profile.companion_type||'her';
+  document.getElementById('homeAvatar').style.background=`linear-gradient(135deg,${colors[t]||colors.her})`;
+
+  const credits=await api('GET','/api/credits/balance');
+  if(credits){
+    document.getElementById('homeBalance').textContent=Math.round(credits.balance);
+    document.getElementById('homeMins').textContent=credits.minutes_left;
+    if(credits.low_balance) document.getElementById('lowCreditsCard').style.display='block';
+  }
+
+  fillCompanionForm(data.profile);
+  fillProfileForm(data.profile);
+}
+
+function fillProfileForm(p){
+  if(p.first_name) document.getElementById('pName').value=p.first_name;
+  if(p.age) document.getElementById('pAge').value=p.age;
+  if(p.city) document.getElementById('pCity').value=p.city;
+  if(p.occupation) document.getElementById('pOccupation').value=p.occupation;
+  if(p.about) document.getElementById('pAbout').value=p.about;
+  (p.interests||[]).forEach(i=>{
+    document.querySelectorAll('#interestTags .tag').forEach(t=>{if(t.dataset.val===i)t.classList.add('selected')});
+  });
+}
+
+function fillCompanionForm(p){
+  if(p.companion_name) document.getElementById('cName').value=p.companion_name;
+  if(p.companion_type) document.getElementById('cType').value=p.companion_type;
+  if(p.companion_language) document.getElementById('cLang').value=p.companion_language;
+  (p.companion_personalities||[]).forEach(v=>{
+    document.querySelectorAll('#personalityTags .tag').forEach(t=>{if(t.dataset.val===v)t.classList.add('selected')});
   });
 }
 
 // ── TAGS ──
-function toggleTag(el) {
-  const selected = document.querySelectorAll('#personalityTags .tag.selected');
-  if (!el.classList.contains('selected') && selected.length >= 3) {
-    toast('Pick up to 3 personalities');
-    return;
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.tag');if(!t) return;
+  const container=t.closest('[id]');
+  if(container?.id==='personalityTags'){
+    const sel=container.querySelectorAll('.tag.selected');
+    if(!t.classList.contains('selected')&&sel.length>=3){toast('Max 3 personalities');return;}
   }
-  el.classList.toggle('selected');
-}
-
-function toggleInterest(el) { el.classList.toggle('selected'); }
-
-function toggleDayTag(el) { el.classList.toggle('selected'); }
+  t.classList.toggle('selected');
+});
 
 // ── SAVE COMPANION ──
-async function saveCompanion() {
-  const personalities = [...document.querySelectorAll('#personalityTags .tag.selected')].map(t => t.dataset.val);
-  const data = {
-    companion_name: document.getElementById('cName').value.trim(),
-    companion_type: document.getElementById('cType').value,
-    companion_language: document.getElementById('cLang').value,
-    companion_personalities: personalities,
-  };
-  const desc = document.getElementById('cDesc').value.trim();
-  if (desc) data.description = desc;
-
-  if (!data.companion_name) { toast('Give your companion a name first'); return; }
-  const res = await api('PUT', '/api/profile/update', data);
-  if (res?.success) {
-    toast('Companion saved ✦');
-    document.getElementById('homeCompanionName').textContent = data.companion_name;
-  }
+async function saveCompanion(){
+  const personalities=[...document.querySelectorAll('#personalityTags .tag.selected')].map(t=>t.dataset.val);
+  const name=document.getElementById('cName').value.trim();
+  if(!name){toast('Give your companion a name');return;}
+  const res=await api('PUT','/api/profile/update',{
+    companion_name:name,
+    companion_type:document.getElementById('cType').value,
+    companion_language:document.getElementById('cLang').value,
+    companion_personalities:personalities,
+    description:document.getElementById('cDesc').value.trim()||undefined,
+  });
+  if(res?.success){toast('Saved ✦');document.getElementById('homeCompanionName').textContent=name;}
 }
 
 // ── SAVE PROFILE ──
-async function saveProfile() {
-  const interests = [...document.querySelectorAll('#interestTags .tag.selected')].map(t => t.dataset.val);
-  const data = {
-    first_name: document.getElementById('pName').value.trim(),
-    age: parseInt(document.getElementById('pAge').value) || null,
-    city: document.getElementById('pCity').value.trim(),
-    occupation: document.getElementById('pOccupation').value.trim(),
-    about: document.getElementById('pAbout').value.trim(),
+async function saveProfile(){
+  const interests=[...document.querySelectorAll('#interestTags .tag.selected')].map(t=>t.dataset.val);
+  const res=await api('PUT','/api/profile/update',{
+    first_name:document.getElementById('pName').value.trim()||undefined,
+    age:parseInt(document.getElementById('pAge').value)||undefined,
+    city:document.getElementById('pCity').value.trim()||undefined,
+    occupation:document.getElementById('pOccupation').value.trim()||undefined,
+    about:document.getElementById('pAbout').value.trim()||undefined,
     interests,
-  };
-  const res = await api('PUT', '/api/profile/update', data);
-  if (res?.success) {
+  });
+  if(res?.success){
     toast('Profile saved ✦');
-    if (data.first_name) document.getElementById('userName').textContent = data.first_name;
+    const n=document.getElementById('pName').value.trim();
+    if(n) document.getElementById('userName').textContent=n.split(' ')[0];
   }
 }
 
 // ── MEMORY ──
-async function loadMemory() {
-  const data = await api('GET', '/api/profile/memory');
-  if (!data) return;
-  const list = document.getElementById('memoryList');
-  document.getElementById('factCount').textContent = data.total_facts;
-  if (!data.summary?.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:0.88rem">No memories yet — make some calls and your companion will start remembering things about you ✦</div>';
+async function loadMemory(){
+  const data=await api('GET','/api/profile/memory');
+  if(!data) return;
+  document.getElementById('factCount').textContent=data.total_facts||0;
+  const list=document.getElementById('memoryList');
+  if(!data.summary?.length){
+    list.innerHTML='<div style="color:var(--muted);font-size:0.85rem">No memories yet — make some calls and your companion will start remembering you ✦</div>';
     return;
   }
-  list.innerHTML = data.summary.map(m => `
-    <div class="memory-item">
-      <div class="memory-dot"></div>
-      <div style="font-size:0.88rem">${m}</div>
-    </div>
-  `).join('');
+  list.innerHTML=data.summary.map(m=>`<div class="mem-item"><div class="mem-dot"></div><div style="font-size:0.86rem">${m}</div></div>`).join('');
 }
-
-async function clearMemory() {
-  if (!confirm('Clear all memories? Your companion will start fresh.')) return;
-  await api('DELETE', '/api/profile/memory');
-  toast('Memory cleared');
-  loadMemory();
+async function clearMemory(){
+  if(!confirm('Clear all memories?')) return;
+  await api('DELETE','/api/profile/memory');
+  toast('Memory cleared');loadMemory();
 }
 
 // ── SCHEDULE ──
-async function loadSchedule() {
-  const data = await api('GET', '/api/profile/scheduled-calls');
-  if (!data) return;
-  const list = document.getElementById('scheduleList');
-  if (!data.scheduled_calls?.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">No scheduled calls yet. Add one below ↓</div>';
+async function loadSchedule(){
+  const data=await api('GET','/api/profile/scheduled-calls');
+  if(!data) return;
+  const list=document.getElementById('scheduleList');
+  if(!data.scheduled_calls?.length){
+    list.innerHTML='<div style="color:var(--muted);font-size:0.83rem;margin-bottom:0.8rem">No scheduled calls yet</div>';
     return;
   }
-  list.innerHTML = data.scheduled_calls.map(s => `
-    <div class="schedule-item">
-      <div>
-        <div style="font-weight:600">${s.time} — ${s.topic}</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem">${(s.days||[]).join(', ')}</div>
-      </div>
-      <button class="btn-ghost btn-sm" onclick="deleteSchedule('${s.id}')">Remove</button>
-    </div>
-  `).join('');
+  list.innerHTML=data.scheduled_calls.map(s=>`
+    <div class="sched-item">
+      <div><div style="font-weight:600;font-size:0.9rem">${s.time} — ${s.topic}</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem">${(s.days||[]).join(', ')}</div></div>
+      <button class="btn-ghost btn-sm" onclick="delSchedule('${s.id}')">Remove</button>
+    </div>`).join('');
 }
-
-async function addSchedule() {
-  const days = [...document.querySelectorAll('#dayTags .tag.selected')].map(t => t.dataset.val);
-  if (!days.length) { toast('Select at least one day'); return; }
-  const body = {
-    time: document.getElementById('sTime').value,
-    topic: document.getElementById('sTopic').value || 'daily check-in',
-    days,
-    phone: profileData.user?.phone || ''
-  };
-  const res = await api('POST', '/api/profile/scheduled-calls', body);
-  if (res?.success) { toast('Scheduled ✦'); loadSchedule(); }
+async function addSchedule(){
+  const days=[...document.querySelectorAll('#dayTags .tag.selected')].map(t=>t.dataset.val);
+  if(!days.length){toast('Select at least one day');return;}
+  const res=await api('POST','/api/profile/scheduled-calls',{
+    time:document.getElementById('sTime').value,
+    topic:document.getElementById('sTopic').value||'daily check-in',
+    days,phone:profileData.user?.phone||''
+  });
+  if(res?.success){toast('Scheduled ✦');loadSchedule();}
 }
-
-async function deleteSchedule(id) {
-  await api('DELETE', `/api/profile/scheduled-calls/${id}`);
-  toast('Removed');
-  loadSchedule();
+async function delSchedule(id){
+  await api('DELETE',`/api/profile/scheduled-calls/${id}`);
+  toast('Removed');loadSchedule();
 }
 
 // ── CREDITS ──
-async function loadCredits() {
-  const data = await api('GET', '/api/credits/balance');
-  if (data) {
-    document.getElementById('creditBalance').textContent = Math.round(data.balance);
-    document.getElementById('creditMins').textContent = data.minutes_left;
-    const pct = Math.min(100, (data.balance / 500) * 100);
-    document.getElementById('creditProgressBar').style.width = pct + '%';
+async function loadCredits(){
+  const data=await api('GET','/api/credits/balance');
+  if(data){
+    document.getElementById('creditBalance').textContent=Math.round(data.balance);
+    document.getElementById('creditMins').textContent=data.minutes_left;
+    document.getElementById('creditBar').style.width=Math.min(100,(data.balance/500)*100)+'%';
   }
-  const txns = await api('GET', '/api/credits/transactions');
-  if (txns) {
-    const list = document.getElementById('txnList');
-    if (!txns.transactions?.length) {
-      list.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">No transactions yet</div>';
-      return;
-    }
-    list.innerHTML = txns.transactions.map(t => `
-      <div class="call-row">
-        <div>
-          <div style="font-size:0.88rem">${t.description}</div>
-          <div class="call-date">${new Date(t.date).toLocaleDateString('en-IN')}</div>
-        </div>
-        <div style="font-weight:600;color:${t.amount > 0 ? '#4ade80' : 'var(--rose)'}">
-          ${t.amount > 0 ? '+' : ''}${t.amount} cr
-        </div>
-      </div>
-    `).join('');
+  const txns=await api('GET','/api/credits/transactions');
+  if(txns){
+    const list=document.getElementById('txnList');
+    if(!txns.transactions?.length){list.innerHTML='<div style="color:var(--muted);font-size:0.83rem">No transactions yet</div>';return;}
+    list.innerHTML=txns.transactions.map(t=>`
+      <div class="list-row">
+        <div><div class="list-main">${t.description}</div>
+        <div class="list-sub">${new Date(t.date).toLocaleDateString('en-IN')}</div></div>
+        <div style="font-weight:600;color:${t.amount>0?'#4ade80':'var(--rose)'}">${t.amount>0?'+':''}${t.amount} cr</div>
+      </div>`).join('');
   }
 }
-
-function selectAmount(el, amount) {
-  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedAmount = amount;
-  document.getElementById('customAmount').value = '';
+function selectAmt(el,amt){
+  document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');selectedAmt=amt;
+  document.getElementById('customAmt').value='';
 }
-
-async function initiateTopUp() {
-  const custom = parseInt(document.getElementById('customAmount').value);
-  const amount = custom || selectedAmount;
-  if (!amount || amount < 50) { toast('Minimum top-up is ₹50'); return; }
-
-  const order = await api('POST', '/api/credits/create-order', { amount });
-  if (!order?.order_id) { toast('Could not create order'); return; }
-
-  // Load Razorpay
-  const script = document.createElement('script');
-  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+async function doTopUp(){
+  const custom=parseInt(document.getElementById('customAmt').value);
+  const amount=custom||selectedAmt;
+  if(!amount||amount<50){toast('Minimum ₹50');return;}
+  const order=await api('POST','/api/credits/create-order',{amount});
+  if(!order?.order_id){toast('Order failed');return;}
+  const script=document.createElement('script');
+  script.src='https://checkout.razorpay.com/v1/checkout.js';
   document.head.appendChild(script);
-  script.onload = () => {
-    const rzp = new Razorpay({
-      key: order.key_id,
-      amount: order.amount,
-      currency: 'INR',
-      name: 'CallMyBae',
-      description: `${order.credits_to_add} credits (${order.minutes} mins)`,
-      order_id: order.order_id,
-      handler: async (response) => {
-        const res = await api('POST', '/api/credits/verify-topup', {
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-          amount_inr: amount
+  script.onload=()=>{
+    new Razorpay({
+      key:order.key_id,amount:order.amount,currency:'INR',
+      name:'CallMyBae',description:`${order.credits_to_add} credits (${Math.round(order.minutes)} mins)`,
+      order_id:order.order_id,
+      handler:async(r)=>{
+        const res=await api('POST','/api/credits/verify-topup',{
+          razorpay_order_id:r.razorpay_order_id,
+          razorpay_payment_id:r.razorpay_payment_id,
+          razorpay_signature:r.razorpay_signature,
+          amount_inr:amount
         });
-        if (res?.success) {
-          toast(`✦ ${res.credits_added} credits added!`);
-          loadCredits();
-        }
+        if(res?.success){toast(`✦ ${res.credits_added} credits added!`);loadCredits();}
       },
-      prefill: { email: userData.email || '', contact: profileData.user?.phone || '' },
-      theme: { color: '#ff6b8a' }
-    });
-    rzp.open();
+      prefill:{email:profileData.user?.email||'',contact:profileData.user?.phone||''},
+      theme:{color:'#ff6b8a'}
+    }).open();
   };
 }
 
-// ── CALL HISTORY ──
-async function loadCallHistory() {
-  const data = await api('GET', '/api/profile/');
-  if (!data?.recent_calls) return;
-  const list = document.getElementById('callHistoryList');
-  if (!data.recent_calls.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">No calls yet</div>';
-    return;
-  }
-  list.innerHTML = data.recent_calls.map(c => `
-    <div class="call-row">
-      <div>
-        <div class="call-duration">${c.duration}</div>
-        <div class="call-date">${new Date(c.date).toLocaleString('en-IN')}</div>
+// ── HISTORY ──
+async function loadHistory(){
+  const data=await api('GET','/api/profile/');
+  if(!data?.recent_calls) return;
+  const list=document.getElementById('callHistoryList');
+  if(!data.recent_calls.length){list.innerHTML='<div style="color:var(--muted);font-size:0.83rem">No calls yet</div>';return;}
+  list.innerHTML=data.recent_calls.map(c=>`
+    <div class="list-row">
+      <div><div class="list-main">${c.duration}</div>
+      <div class="list-sub">${new Date(c.date).toLocaleString('en-IN')}</div></div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        ${c.recording_url?`<a href="${c.recording_url}" target="_blank" class="badge badge-green">🔴 Rec</a>`:''}
+        <span class="badge">${c.status}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:0.7rem">
-        ${c.recording_url ? `<a href="${c.recording_url}" target="_blank" class="call-badge">🔴 Recording</a>` : ''}
-        <span class="call-badge">${c.status}</span>
-      </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 // ── QUICK CALL ──
-async function quickCall() {
-  if (!profileData.user?.phone) {
-    toast('Add your phone number in Profile first');
-    showPage('profile', document.querySelectorAll('.nav-item')[5]);
-    return;
-  }
-  const credits = await api('GET', '/api/credits/balance');
-  if (credits && credits.low_balance && credits.balance < 2) {
-    toast('Not enough credits. Top up first.');
-    showPage('credits', document.querySelectorAll('.nav-item')[4]);
-    return;
-  }
-  const profile = profileData.profile;
+async function quickCall(){
+  if(!profileData.user?.phone){toast('Add phone in Profile first');navTo('profile');return;}
+  const credits=await api('GET','/api/credits/balance');
+  if(credits&&credits.balance<2){toast('Not enough credits');navTo('credits');return;}
+  const p=profileData.profile;
   toast('Calling you now...');
-  const res = await api('POST', '/api/calls/initiate', {
-    phone: profileData.user.phone,
-    companion_name: profile.companion_name || 'Luna',
-    companion_type: profile.companion_type || 'her',
-    personalities: profile.companion_personalities || ['warm'],
-    language: profile.companion_language || 'hi',
+  const res=await api('POST','/api/calls/initiate',{
+    phone:profileData.user.phone,
+    companion_name:p.companion_name||'Luna',
+    companion_type:p.companion_type||'her',
+    personalities:p.companion_personalities||['warm'],
+    language:p.companion_language||'hi',
   });
-  if (res?.call_session_id) {
-    toast('📞 Your companion is calling!');
-  } else {
-    toast(res?.detail || 'Could not place call');
-  }
+  if(res?.call_session_id) toast('📞 Your companion is calling!');
+  else toast(res?.detail||'Could not place call');
 }
 
-// ── LOGOUT ──
-function logout() {
-  localStorage.removeItem('cmb_token');
-  localStorage.removeItem('cmb_user');
-  window.location.href = '/';
-}
+function logout(){localStorage.removeItem('cmb_token');localStorage.removeItem('cmb_user');window.location.href='/';}
 
-// Start
 init();
 </script>
 </body>
