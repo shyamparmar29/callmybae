@@ -421,6 +421,10 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
           </div>
         </div>
         <div class="form-group">
+          <label class="form-label">Your phone number (for calls)</label>
+          <input class="form-input" id="pPhone" placeholder="+91 XXXXXXXXXX or 10-digit number" type="tel">
+        </div>
+        <div class="form-group">
           <label class="form-label">Tell your companion about yourself</label>
           <textarea class="form-textarea" id="pAbout" placeholder="Share anything — your life, what you love, what's on your mind..."></textarea>
         </div>
@@ -562,6 +566,9 @@ function fillProfileForm(p){
   if(p.city) document.getElementById('pCity').value=p.city;
   if(p.occupation) document.getElementById('pOccupation').value=p.occupation;
   if(p.about) document.getElementById('pAbout').value=p.about;
+  // phone is on user object
+  const phone=profileData.user?.phone||'';
+  if(phone) document.getElementById('pPhone').value=phone;
   (p.interests||[]).forEach(i=>{
     document.querySelectorAll('#interestTags .tag').forEach(t=>{if(t.dataset.val===i)t.classList.add('selected')});
   });
@@ -571,6 +578,7 @@ function fillCompanionForm(p){
   if(p.companion_name) document.getElementById('cName').value=p.companion_name;
   if(p.companion_type) document.getElementById('cType').value=p.companion_type;
   if(p.companion_language) document.getElementById('cLang').value=p.companion_language;
+  if(p.companion_description) document.getElementById('cDesc').value=p.companion_description;
   (p.companion_personalities||[]).forEach(v=>{
     document.querySelectorAll('#personalityTags .tag').forEach(t=>{if(t.dataset.val===v)t.classList.add('selected')});
   });
@@ -597,7 +605,7 @@ async function saveCompanion(){
     companion_type:document.getElementById('cType').value,
     companion_language:document.getElementById('cLang').value,
     companion_personalities:personalities,
-    description:document.getElementById('cDesc').value.trim()||undefined,
+    companion_description:document.getElementById('cDesc').value.trim()||undefined,
   });
   if(res?.success){toast('Saved ✦');document.getElementById('homeCompanionName').textContent=name;}
 }
@@ -612,11 +620,14 @@ async function saveProfile(){
     occupation:document.getElementById('pOccupation').value.trim()||undefined,
     about:document.getElementById('pAbout').value.trim()||undefined,
     interests,
+    phone:document.getElementById('pPhone').value.trim()||undefined,
   });
   if(res?.success){
     toast('Profile saved ✦');
     const n=document.getElementById('pName').value.trim();
     if(n) document.getElementById('userName').textContent=n.split(' ')[0];
+    const ph=document.getElementById('pPhone').value.trim();
+    if(ph&&profileData.user) profileData.user.phone=ph.startsWith('+')?ph:'+91'+ph;
   }
 }
 
@@ -742,17 +753,19 @@ async function loadHistory(){
 
 // ── QUICK CALL ──
 async function quickCall(){
-  if(!profileData.user?.phone){toast('Add phone in Profile first');navTo('profile');return;}
+  const userPhone=profileData.user?.phone;
+  if(!userPhone){toast('Add your phone number in Profile first');navTo('profile');return;}
   const credits=await api('GET','/api/credits/balance');
   if(credits&&credits.balance<2){toast('Not enough credits');navTo('credits');return;}
   const p=profileData.profile;
   toast('Calling you now...');
   const res=await api('POST','/api/calls/initiate',{
-    phone:profileData.user.phone,
+    phone:userPhone,
     companion_name:p.companion_name||'Luna',
     companion_type:p.companion_type||'her',
     personalities:p.companion_personalities||['warm'],
     language:p.companion_language||'hi',
+    description:p.companion_description||undefined,
   });
   if(res?.call_session_id) toast('📞 Your companion is calling!');
   else toast(res?.detail||'Could not place call');
