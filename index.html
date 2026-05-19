@@ -661,8 +661,8 @@
       <li><a href="#how">How It Works</a></li>
       <li><a href="#personalities">Companions</a></li>
       <li><a href="#pricing">Pricing</a></li>
-      <li><a href="#" onclick="openAuth()">Sign In</a></li>
-      <li><a href="#" class="nav-cta" onclick="openWizard()">Try Free Call ✦</a></li>
+      <li><a href="#" id="navAuthLink" onclick="handleNavAuth()">Sign In</a></li>
+      <li><a href="#" class="nav-cta" id="navCtaLink" onclick="openWizard()">Try Free Call ✦</a></li>
     </ul>
     <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -676,7 +676,7 @@
   <a href="#how" onclick="toggleMobileMenu()">How It Works</a>
   <a href="#personalities" onclick="toggleMobileMenu()">Companions</a>
   <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
-  <a href="#" onclick="toggleMobileMenu(); openAuth()">Sign In</a>
+  <a href="#" id="mobileAuthLink" onclick="toggleMobileMenu(); handleNavAuth()">Sign In</a>
   <button class="btn-primary" onclick="toggleMobileMenu(); openWizard()">Try Free Call ✦</button>
 </div>
 
@@ -1671,6 +1671,7 @@
         localStorage.setItem('cmb_user', JSON.stringify({id: data.user_id, name: data.name, plan: data.plan}));
         showToast('Welcome back, ' + data.name + '! ✦');
         closeAuth();
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
       } else {
         showToast(data.detail || 'Sign in failed');
       }
@@ -1695,6 +1696,7 @@
         localStorage.setItem('cmb_user', JSON.stringify({id: data.user_id, name: data.name, plan: data.plan}));
         showToast('Welcome to CallMyBae, ' + data.name + '! ✦');
         closeAuth();
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
       } else {
         showToast(data.detail || 'Registration failed');
       }
@@ -1734,7 +1736,7 @@
         window.history.replaceState({}, '', '/');
         showToast('Welcome, ' + data.name + '! ✦');
         closeAuth();
-        updateNavForUser(data.name);
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
       } else {
         showToast(data.detail || 'Login failed');
       }
@@ -1743,12 +1745,24 @@
     }
   }
 
+  function handleNavAuth() {
+    const user = JSON.parse(localStorage.getItem('cmb_user') || '{}');
+    if (user.id) {
+      window.location.href = '/dashboard.html';
+    } else {
+      openAuth();
+    }
+  }
+
   function updateNavForUser(name) {
     const user = JSON.parse(localStorage.getItem('cmb_user') || '{}');
-    if (user.name) {
-      document.querySelectorAll('a[onclick*="openAuth"]').forEach(el => {
-        el.textContent = user.name.split(' ')[0];
-      });
+    if (user.id) {
+      const firstName = (user.name || name || 'Me').split(' ')[0];
+      document.getElementById('navAuthLink').textContent = firstName + ' →';
+      document.getElementById('navCtaLink').textContent = 'My Dashboard ✦';
+      document.getElementById('navCtaLink').onclick = () => window.location.href = '/dashboard.html';
+      const mob = document.getElementById('mobileAuthLink');
+      if (mob) mob.textContent = 'My Dashboard';
     }
   }
 
