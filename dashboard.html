@@ -10,6 +10,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif}
+/* Mobile: allow body scroll */
+@media(max-width:768px){html,body{overflow:auto}}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px}
 
 /* ── LAYOUT ── */
@@ -138,18 +140,23 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
-  .sidebar{display:none}
-  .topbar{display:flex}
-  .bottom-nav{display:block}
+  .sidebar{display:none !important}
+  .topbar{display:flex !important}
+  .bottom-nav{display:flex !important;flex-direction:column}
+  .bottom-nav-inner{display:flex}
   .content{padding:1rem 1rem 1.2rem}
   .stat-grid{grid-template-columns:1fr 1fr}
   .form-row{grid-template-columns:1fr}
   .amount-grid{grid-template-columns:repeat(2,1fr)}
   .section-title{font-size:1.3rem}
+  /* ensure layout stacks on mobile */
+  .layout{flex-direction:column}
+  .main{height:calc(100vh - var(--topbar));display:flex;flex-direction:column}
+  .content{flex:1;overflow-y:auto}
 }
 @media(min-width:769px){
-  .topbar{display:none}
-  .bottom-nav{display:none}
+  .topbar{display:none !important}
+  .bottom-nav{display:none !important}
 }
 </style>
 </head>
