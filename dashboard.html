@@ -62,6 +62,17 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
 .bnav-btn.active{color:var(--rose)}
 .bnav-icon{font-size:1.3rem;line-height:1}
 .bnav-btn [data-icon="rupee"]{font-size:1.1rem;font-weight:700}
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.char-grid-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.8rem}
+.char-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;transition:var(--trans);cursor:pointer;display:flex;flex-direction:column;gap:0.6rem}
+.char-card:hover{border-color:var(--rose);transform:translateY(-2px);box-shadow:0 12px 36px rgba(255,107,138,0.18)}
+.char-avatar{font-size:2.5rem;line-height:1}
+.char-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--cream)}
+.char-tag{font-size:0.8rem;color:var(--muted);line-height:1.45}
+.char-meta{font-size:0.72rem;color:var(--cream2);margin-top:0.2rem}
+.char-call-btn{margin-top:0.6rem;background:linear-gradient(135deg,var(--rose),var(--rose2));border:none;color:#fff;padding:0.55rem 1rem;border-radius:100px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:var(--trans)}
+.char-call-btn:hover{box-shadow:0 8px 24px rgba(255,107,138,0.4)}
+.char-status{font-size:0.7rem;color:var(--gold);margin-top:0.3rem;font-style:italic}
 
 /* ── PAGES ── */
 .page{display:none}.page.active{display:block}
@@ -171,6 +182,7 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
   <div class="sidebar-logo">CallMyBae</div>
   <nav class="sidebar-nav">
     <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Home</button>
+    <button class="nav-btn" data-page="characters"><span class="nav-icon">✨</span> Talk to Someone</button>
     <button class="nav-btn" data-page="companion"><span class="nav-icon">💫</span> My Companion</button>
     <button class="nav-btn" data-page="memory"><span class="nav-icon">🧠</span> Memory</button>
     <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Scheduled Calls</button>
@@ -238,6 +250,22 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
           <button class="btn-primary btn-sm" onclick="navTo('credits')">Top Up ✦</button>
         </div>
       </div>
+
+      <div style="margin-top:1.8rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600">Or talk to someone new</div>
+          <button class="btn-ghost btn-sm" onclick="navTo('characters')">See all</button>
+        </div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">People with their own lives. They remember what you tell them.</div>
+        <div id="homeCharactersGrid" class="char-grid-mini"><div style="color:var(--muted);font-size:0.83rem">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- CHARACTERS PAGE -->
+    <div class="page" id="page-characters">
+      <div class="section-title">Talk to Someone</div>
+      <div class="section-sub">Each one has their own personality, their own life. They remember every conversation.</div>
+      <div id="charactersGrid" class="char-grid"><div style="color:var(--muted);font-size:0.83rem">Loading...</div></div>
     </div>
 
     <!-- COMPANION -->
@@ -470,11 +498,11 @@ body{background:var(--bg);color:var(--cream);font-family:'Plus Jakarta Sans',san
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">
       <button class="bnav-btn active" data-page="home"><div class="bnav-icon">🏠</div>Home</button>
-      <button class="bnav-btn" data-page="companion"><div class="bnav-icon">✨</div>Companion</button>
+      <button class="bnav-btn" data-page="characters"><div class="bnav-icon">✨</div>Talk</button>
+      <button class="bnav-btn" data-page="companion"><div class="bnav-icon">💫</div>Companion</button>
       <button class="bnav-btn" data-page="memory"><div class="bnav-icon">🧠</div>Memory</button>
       <button class="bnav-btn" data-page="credits"><div class="bnav-icon" style="font-size:1.1rem;font-weight:700;font-family:sans-serif">₹</div>Credits</button>
       <button class="bnav-btn" data-page="profile"><div class="bnav-icon">👤</div>Profile</button>
-      <button class="bnav-btn" data-page="schedule"><div class="bnav-icon">📅</div>Schedule</button>
       <button class="bnav-btn" data-page="history"><div class="bnav-icon">📞</div>History</button>
     </div>
   </nav>
@@ -487,7 +515,7 @@ const API = 'https://callmybae-backend.onrender.com';
 const token = localStorage.getItem('cmb_token');
 if (!token) window.location.href = '/';
 
-const PAGE_TITLES = {home:'Home',companion:'My Companion',memory:'Memory',schedule:'Scheduled Calls',credits:'Credits',profile:'Profile',history:'History'};
+const PAGE_TITLES = {home:'Home',characters:'Talk to Someone',companion:'My Companion',memory:'Memory',schedule:'Scheduled Calls',credits:'Credits',profile:'Profile',history:'History'};
 let profileData = {}, selectedAmt = 0;
 
 // ── API ──
@@ -530,6 +558,7 @@ function initNav(){
       // Load data for page
       if(page==='memory') loadMemory();
       if(page==='credits') loadCredits();
+      if(page==='characters') loadCharacters();
       if(page==='history') loadHistory();
       if(page==='schedule') loadSchedule();
     });
@@ -545,6 +574,21 @@ async function init(){
   const data=await api('GET','/api/profile/');
   if(!data) return;
   profileData=data;
+
+  // Load characters in background — appears on home + characters tab
+  loadHomeCharacters().then(()=>{
+    // If URL has ?call=charId, trigger character call immediately
+    const params = new URLSearchParams(window.location.search);
+    const callChar = params.get('call');
+    if (callChar) {
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard.html');
+      const c = charactersCache?.find(x => x.id === callChar);
+      if (c) {
+        setTimeout(()=>callCharacter(callChar, c.name), 600);
+      }
+    }
+  });
 
   const name=(data.profile.first_name||data.user.name||'friend').split(' ')[0];
   document.getElementById('userName').textContent=name;
@@ -686,6 +730,72 @@ async function addSchedule(){
 async function delSchedule(id){
   await api('DELETE',`/api/profile/scheduled-calls/${id}`);
   toast('Removed');loadSchedule();
+}
+
+// ── CHARACTERS ──
+let charactersCache = null;
+async function loadCharacters(targetId){
+  const target = targetId || 'charactersGrid';
+  if(!charactersCache){
+    const data = await api('GET','/api/characters/');
+    charactersCache = data?.characters || [];
+  }
+  const grid = document.getElementById(target);
+  if(!grid) return;
+  if(!charactersCache.length){
+    grid.innerHTML = '<div style="color:var(--muted);font-size:0.83rem">No characters available yet.</div>';
+    return;
+  }
+  grid.innerHTML = charactersCache.map(c=>`
+    <div class="char-card" onclick="viewCharacter('${c.id}')">
+      <div style="display:flex;align-items:center;gap:0.8rem">
+        <div class="char-avatar">${c.avatar_emoji||'✨'}</div>
+        <div>
+          <div class="char-name">${c.name}</div>
+          <div class="char-meta">${c.age} • ${c.location}</div>
+        </div>
+      </div>
+      <div class="char-tag">${c.tagline||''}</div>
+      <button class="char-call-btn" onclick="event.stopPropagation();callCharacter('${c.id}','${c.name}')">📞 Call ${c.name}</button>
+    </div>
+  `).join('');
+}
+async function loadHomeCharacters(){
+  if(!charactersCache){
+    const data = await api('GET','/api/characters/');
+    charactersCache = data?.characters || [];
+  }
+  const grid = document.getElementById('homeCharactersGrid');
+  if(!grid) return;
+  // Show top 4 on home page
+  const top = charactersCache.slice(0, 4);
+  grid.innerHTML = top.map(c=>`
+    <div class="char-card" onclick="callCharacter('${c.id}','${c.name}')">
+      <div style="display:flex;align-items:center;gap:0.8rem">
+        <div class="char-avatar">${c.avatar_emoji||'✨'}</div>
+        <div>
+          <div class="char-name" style="font-size:1.15rem">${c.name}</div>
+          <div class="char-meta">${c.location}</div>
+        </div>
+      </div>
+      <div class="char-tag" style="font-size:0.74rem">${c.tagline||''}</div>
+    </div>
+  `).join('');
+}
+async function viewCharacter(charId){
+  // For now just call them directly. Future: show detail modal.
+  const c = charactersCache?.find(x=>x.id===charId);
+  if(c) callCharacter(charId, c.name);
+}
+async function callCharacter(charId, charName){
+  if(!confirm(`Call ${charName}? They'll dial you right now.`)) return;
+  toast(`Calling ${charName}...`);
+  const res = await api('POST', `/api/characters/${charId}/call`, {});
+  if(res?.call_session_id){
+    toast(`📞 ${charName} is calling you!`);
+  } else {
+    toast(res?.detail || 'Could not start call. Check your credits.');
+  }
 }
 
 // ── CREDITS ──

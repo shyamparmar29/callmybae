@@ -822,6 +822,19 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════ CHARACTERS ═══════════════════════════════ -->
+<section class="characters-landing" id="characters" style="padding:7rem 0;border-top:0.5px solid var(--border)">
+  <div class="container">
+    <div class="section-tag">Or skip building & talk to</div>
+    <h2 class="section-title">People with their own<br><em>actual lives</em></h2>
+    <p class="section-sub">Each character has a name, a job, a city, ongoing problems and small wins. Their life moves between calls — sometimes they get a promotion, sometimes they fight with their mom. They remember every conversation.</p>
+
+    <div id="landingCharGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem;margin-top:3rem">
+      <div style="color:var(--cream2);font-size:0.9rem">Loading characters...</div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════════════════════════ PRICING ═══════════════════════════════ -->
 <section class="pricing" id="pricing">
   <div class="container">
@@ -1490,6 +1503,50 @@
 
   // ── INITIATE CALL ──
   const API_URL = 'https://callmybae-backend.onrender.com';
+
+  // ── LANDING CHARACTERS — load on page ready ──
+  async function loadLandingCharacters() {
+    try {
+      const res = await fetch(API_URL + '/api/characters/');
+      const data = await res.json();
+      const grid = document.getElementById('landingCharGrid');
+      if (!grid || !data.characters?.length) return;
+      grid.innerHTML = data.characters.map(c => `
+        <div onclick="onLandingCharClick('${c.id}', '${c.name.replace(/'/g, "\\'")}')"
+             style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:18px;padding:1.5rem;cursor:pointer;transition:all 0.28s ease;display:flex;flex-direction:column;gap:0.7rem"
+             onmouseenter="this.style.borderColor='var(--rose)';this.style.transform='translateY(-3px)'"
+             onmouseleave="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+          <div style="display:flex;align-items:center;gap:0.8rem">
+            <div style="font-size:2.4rem;line-height:1">${c.avatar_emoji || '✨'}</div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--cream)">${c.name}</div>
+              <div style="font-size:0.75rem;color:var(--muted)">${c.age} • ${c.location}</div>
+            </div>
+          </div>
+          <div style="font-size:0.82rem;color:var(--cream2);line-height:1.5">${c.tagline || ''}</div>
+          <div style="font-size:0.72rem;color:var(--rose);margin-top:0.3rem;font-weight:600">Call ${c.name} →</div>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error('landing chars:', e);
+    }
+  }
+  function onLandingCharClick(charId, charName) {
+    // If logged in → go to dashboard with char preselected; else → prompt signup
+    const token = localStorage.getItem('cmb_token');
+    if (token) {
+      window.location.href = '/dashboard.html?call=' + charId;
+    } else {
+      alert(`Sign up to call ${charName}! It only takes 30 seconds and the first 5 minutes are free.`);
+      goStep(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+  if (document.readyState !== 'loading') {
+    loadLandingCharacters();
+  } else {
+    document.addEventListener('DOMContentLoaded', loadLandingCharacters);
+  }
 
   async function initiateCall() {
     const code = document.getElementById('countryCode').value;
