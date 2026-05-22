@@ -1506,11 +1506,24 @@
 
   // ── LANDING CHARACTERS — load on page ready ──
   async function loadLandingCharacters() {
+    const grid = document.getElementById('landingCharGrid');
+    if (!grid) return;
     try {
       const res = await fetch(API_URL + '/api/characters/');
+      if (!res.ok) {
+        console.error('Characters fetch failed:', res.status);
+        // Hide section if API not ready
+        const section = document.getElementById('characters');
+        if (section) section.style.display = 'none';
+        return;
+      }
       const data = await res.json();
-      const grid = document.getElementById('landingCharGrid');
-      if (!grid || !data.characters?.length) return;
+      if (!data.characters?.length) {
+        const section = document.getElementById('characters');
+        if (section) section.style.display = 'none';
+        return;
+      }
+      window._cmbCharacters = data.characters;
       grid.innerHTML = data.characters.map(c => `
         <div onclick="onLandingCharClick('${c.id}', '${c.name.replace(/'/g, "\\'")}')"
              style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:18px;padding:1.5rem;cursor:pointer;transition:all 0.28s ease;display:flex;flex-direction:column;gap:0.7rem"
@@ -1528,20 +1541,114 @@
         </div>
       `).join('');
     } catch (e) {
-      console.error('landing chars:', e);
+      console.error('landing chars error:', e);
+      const section = document.getElementById('characters');
+      if (section) section.style.display = 'none';
     }
   }
+
   function onLandingCharClick(charId, charName) {
-    // If logged in → go to dashboard with char preselected; else → prompt signup
     const token = localStorage.getItem('cmb_token');
     if (token) {
       window.location.href = '/dashboard.html?call=' + charId;
     } else {
-      alert(`Sign up to call ${charName}! It only takes 30 seconds and the first 5 minutes are free.`);
-      goStep(1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      openCharModal(charId, charName);
     }
   }
+
+  // ── CHARACTER QUICK CALL MODAL (for non-logged-in free trial) ──
+  function openCharModal(charId, charName) {
+    const char = window._cmbCharacters?.find(c => c.id === charId);
+    if (!char) return;
+    let modal = document.getElementById('charCallModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'charCallModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div style="background:#0e0a1a;border:1px solid var(--border);border-radius:24px;padding:2rem;max-width:420px;width:100%;color:var(--cream)">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem">
+          <div style="font-size:3rem">${char.avatar_emoji}</div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600">${char.name}</div>
+            <div style="font-size:0.8rem;color:var(--muted)">${char.age} • ${char.location}</div>
+          </div>
+        </div>
+        <div style="font-size:0.88rem;color:var(--cream2);margin-bottom:1.4rem;line-height:1.5">${char.tagline}</div>
+        <div style="font-size:0.75rem;color:var(--gold);margin-bottom:0.4rem">✦ First 5 minutes free — no signup needed</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:1.2rem">Sign up later to keep your conversation history with ${char.name}</div>
+        <label style="font-size:0.78rem;color:var(--cream2);display:block;margin-bottom:0.4rem">Your phone number</label>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem">
+          <select id="charModalCC" style="background:#06040e;border:1px solid var(--border);color:var(--cream);padding:0.7rem;border-radius:10px;font-size:0.9rem">
+            <option value="+91" selected>+91</option>
+            <option value="+1">+1</option>
+            <option value="+44">+44</option>
+            <option value="+971">+971</option>
+            <option value="+61">+61</option>
+            <option value="+65">+65</option>
+          </select>
+          <input id="charModalPhone" type="tel" placeholder="98765 43210"
+                 style="flex:1;background:#06040e;border:1px solid var(--border);color:var(--cream);padding:0.7rem 1rem;border-radius:10px;font-size:0.95rem">
+        </div>
+        <div id="charModalStatus" style="display:none;font-size:0.85rem;color:var(--rose);margin-bottom:0.8rem"></div>
+        <button id="charModalCallBtn"
+                style="width:100%;background:linear-gradient(135deg,var(--rose),var(--rose2));border:none;color:#fff;padding:0.9rem;border-radius:100px;font-size:1rem;font-weight:600;cursor:pointer"
+                onclick="doCharCall('${charId}', '${char.name.replace(/'/g, "\\'")}')">
+          📞 Call ${char.name} Now
+        </button>
+        <button onclick="document.getElementById('charCallModal').remove()"
+                style="width:100%;background:none;border:none;color:var(--muted);padding:0.8rem;font-size:0.85rem;cursor:pointer;margin-top:0.4rem">
+          Cancel
+        </button>
+      </div>
+    `;
+  }
+
+  async function doCharCall(charId, charName) {
+    const phone = document.getElementById('charModalPhone').value.replace(/\s|-/g, '');
+    const cc = document.getElementById('charModalCC').value;
+    if (!phone || phone.length < 7) {
+      const s = document.getElementById('charModalStatus');
+      s.textContent = 'Please enter a valid phone number';
+      s.style.display = 'block';
+      return;
+    }
+    const fullPhone = cc + phone;
+    const btn = document.getElementById('charModalCallBtn');
+    btn.disabled = true;
+    btn.textContent = 'Calling you...';
+    const status = document.getElementById('charModalStatus');
+    status.style.display = 'none';
+    try {
+      const res = await fetch(API_URL + '/api/characters/' + charId + '/call', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ phone: fullPhone })
+      });
+      const data = await res.json();
+      if (res.ok && data.call_session_id) {
+        btn.textContent = '✦ ' + charName + ' is calling you!';
+        btn.style.background = 'linear-gradient(135deg,#4ade80,#22c55e)';
+        setTimeout(() => {
+          document.getElementById('charCallModal').remove();
+        }, 2500);
+      } else {
+        status.textContent = data.detail || 'Could not start call. Try again.';
+        status.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '📞 Call ' + charName + ' Now';
+      }
+    } catch (e) {
+      status.textContent = 'Connection error. Try again.';
+      status.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '📞 Call ' + charName + ' Now';
+    }
+  }
+
   if (document.readyState !== 'loading') {
     loadLandingCharacters();
   } else {
@@ -1800,6 +1907,22 @@
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     if (!code) return;
+
+    // ── CRITICAL: clear code from URL IMMEDIATELY so reload/double-fire can't reuse it ──
+    window.history.replaceState({}, '', window.location.pathname);
+
+    // ── Guard against double-execution (handler could fire twice on certain navigations) ──
+    if (window._cmbGoogleProcessing) return;
+    window._cmbGoogleProcessing = true;
+
+    // ── Also guard against a previously-consumed code (sessionStorage survives reloads but not new tabs) ──
+    const consumedCode = sessionStorage.getItem('cmb_consumed_oauth_code');
+    if (consumedCode === code) {
+      window._cmbGoogleProcessing = false;
+      return;
+    }
+    sessionStorage.setItem('cmb_consumed_oauth_code', code);
+
     showToast('Signing you in...');
     try {
       const res = await fetch(API_URL + '/api/auth/google/callback', {
@@ -1808,18 +1931,23 @@
         body: JSON.stringify({ code })
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.access_token) {
         localStorage.setItem('cmb_token', data.access_token);
         localStorage.setItem('cmb_user', JSON.stringify({id: data.user_id, name: data.name, plan: data.plan}));
-        window.history.replaceState({}, '', '/');
+        sessionStorage.removeItem('cmb_consumed_oauth_code'); // cleanup after success
         showToast('Welcome, ' + data.name + '! ✦');
         closeAuth();
         setTimeout(() => window.location.href = '/dashboard.html', 800);
       } else {
-        showToast(data.detail || 'Login failed');
+        // Clear consumed marker so user can try again with a fresh code
+        sessionStorage.removeItem('cmb_consumed_oauth_code');
+        showToast(data.detail || 'Sign in failed. Please try again.');
       }
     } catch(e) {
+      sessionStorage.removeItem('cmb_consumed_oauth_code');
       showToast('Login error');
+    } finally {
+      window._cmbGoogleProcessing = false;
     }
   }
 
